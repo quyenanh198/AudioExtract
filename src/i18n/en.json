@@ -1,0 +1,66 @@
+{
+  "header": {
+    "title": "AudioExtract",
+    "subtitle": "Extract high-quality audio from videos"
+  },
+  "urlInput": {
+    "placeholder": "Paste video URL here...",
+    "paste": "Paste",
+    "invalid": "Invalid URL",
+    "fetching": "Fetching info..."
+  },
+  "videoInfo": {
+    "duration": "Duration",
+    "uploader": "Uploader",
+    "platform": "Platform"
+  },
+  "formatPicker": {
+    "title": "Output Format",
+    "quality": "Quality",
+    "format": "Format"
+  },
+  "trimmer": {
+    "title": "Trim Audio",
+    "start": "Start",
+    "end": "End",
+    "useFullTrack": "Use full track",
+    "preview": "Preview"
+  },
+  "download": {
+    "start": "Download",
+    "cancel": "Cancel",
+    "progress": "Progress",
+    "speed": "Speed",
+    "eta": "ETA",
+    "completed": "Completed",
+    "error": "Error",
+    "queue": "Queued"
+  },
+  "history": {
+    "title": "Download History",
+    "empty": "No history yet",
+    "openFile": "Open File",
+    "openFolder": "Open Folder",
+    "delete": "Delete",
+    "clear": "Clear All"
+  },
+  "settings": {
+    "title": "Settings",
+    "outputDir": "Output Directory",
+    "defaultFormat": "Default Format",
+    "defaultQuality": "Default Quality",
+    "theme": "Theme",
+    "language": "Language",
+    "autoUpdate": "Auto Update",
+    "concurrent": "Concurrent Downloads",
+    "browse": "Browse"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close"
+  }
+}

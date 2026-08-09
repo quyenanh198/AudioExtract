@@ -1,0 +1,66 @@
+{
+  "header": {
+    "title": "AudioExtract",
+    "subtitle": "Trích xuất âm thanh từ video chất lượng cao"
+  },
+  "urlInput": {
+    "placeholder": "Dán URL video vào đây...",
+    "paste": "Dán",
+    "invalid": "URL không hợp lệ",
+    "fetching": "Đang lấy thông tin..."
+  },
+  "videoInfo": {
+    "duration": "Thời lượng",
+    "uploader": "Người tải lên",
+    "platform": "Nền tảng"
+  },
+  "formatPicker": {
+    "title": "Định dạng đầu ra",
+    "quality": "Chất lượng",
+    "format": "Định dạng"
+  },
+  "trimmer": {
+    "title": "Cắt âm thanh",
+    "start": "Bắt đầu",
+    "end": "Kết thúc",
+    "useFullTrack": "Sử dụng toàn bộ",
+    "preview": "Nghe thử"
+  },
+  "download": {
+    "start": "Tải xuống",
+    "cancel": "Hủy",
+    "progress": "Tiến trình",
+    "speed": "Tốc độ",
+    "eta": "Còn lại",
+    "completed": "Hoàn thành",
+    "error": "Lỗi",
+    "queue": "Đang chờ"
+  },
+  "history": {
+    "title": "Lịch sử tải xuống",
+    "empty": "Chưa có lịch sử nào",
+    "openFile": "Mở tệp",
+    "openFolder": "Mở thư mục",
+    "delete": "Xóa",
+    "clear": "Xóa tất cả"
+  },
+  "settings": {
+    "title": "Cài đặt",
+    "outputDir": "Thư mục lưu trữ",
+    "defaultFormat": "Định dạng mặc định",
+    "defaultQuality": "Chất lượng mặc định",
+    "theme": "Giao diện",
+    "language": "Ngôn ngữ",
+    "autoUpdate": "Tự động cập nhật",
+    "concurrent": "Số lượt tải đồng thời",
+    "browse": "Duyệt"
+  },
+  "common": {
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "cancel": "Hủy",
+    "save": "Lưu",
+    "close": "Đóng"
+  }
+}

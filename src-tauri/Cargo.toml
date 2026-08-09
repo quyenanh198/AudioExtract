@@ -1,0 +1,27 @@
+[package]
+name = "audio-extract"
+version = "0.1.0"
+description = "Extract audio from YouTube, Facebook, and TikTok videos"
+authors = ["AudioExtract"]
+edition = "2021"
+
+[lib]
+name = "audio_extract_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-fs = "2"
+tauri-plugin-notification = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+uuid = { version = "1", features = ["v4"] }
+regex = "1"
+dirs = "6"
