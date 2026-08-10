@@ -42,9 +42,11 @@ export interface VideoInfo {
   uploader: string;
   platform: string;
   thumbnailUrl?: string;
+  originalUrl?: string;
 }
 
 export interface DownloadAudioParams {
+  taskId: string;
   url: string;
   format: string;
   quality: string;

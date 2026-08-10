@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import { AppSettings } from '../types';
 import { DEFAULT_SETTINGS } from '../utils/constants';
 
+import { invoke } from '@tauri-apps/api/core';
+
 interface SettingsStore {
   settings: AppSettings;
   updateSettings: (updates: Partial<AppSettings>) => void;
@@ -12,15 +14,24 @@ interface SettingsStore {
 
 export const useSettingsStore = create<SettingsStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       settings: DEFAULT_SETTINGS as AppSettings,
       updateSettings: (updates) => set((state) => ({
         settings: { ...state.settings, ...updates }
       })),
       resetSettings: () => set({ settings: DEFAULT_SETTINGS as AppSettings }),
       initSettings: async () => {
-        // Here you would normally fetch the default download directory from Tauri
-        // For now, we leave it as is if it's already set.
+        const currentSettings = get().settings;
+        if (!currentSettings.outputDir) {
+          try {
+            const defaultDir = await invoke<string>('get_default_output_dir');
+            set((state) => ({
+              settings: { ...state.settings, outputDir: defaultDir }
+            }));
+          } catch (error) {
+            console.error('Failed to get default output directory:', error);
+          }
+        }
       }
     }),
     {

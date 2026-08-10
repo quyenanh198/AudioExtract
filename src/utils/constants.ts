@@ -11,7 +11,7 @@ export const DEFAULT_SETTINGS = {
   theme: 'dark',
   language: 'vi',
   autoUpdate: true,
-  concurrentDownloads: 3
+  concurrentDownloads: 5
 };
 
 export const PLATFORM_INFO: Record<string, { name: string, color: string }> = {

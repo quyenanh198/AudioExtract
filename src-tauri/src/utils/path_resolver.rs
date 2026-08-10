@@ -20,16 +20,18 @@ pub fn open_file_in_explorer(path: String) -> Result<(), String> {
     Ok(())
 }
 
-pub fn get_ffmpeg_path(_app: &AppHandle) -> Result<String, String> {
-    // Find the ffmpeg sidecar binary path safely to pass it via --ffmpeg-location
+pub fn resolve_binary_path(name: &str) -> Result<String, String> {
     if let Ok(mut exe_path) = std::env::current_exe() {
         exe_path.pop(); // remove executable name, goes to dir
+        
+        let exe_name = format!("{}.exe", name);
+        let prefix = format!("{}-", name);
         
         // Check next to exe (production layout)
         if let Ok(entries) = std::fs::read_dir(&exe_path) {
             for entry in entries.flatten() {
                 let fname = entry.file_name().to_string_lossy().to_string();
-                if fname.starts_with("ffmpeg-") && fname.ends_with(".exe") {
+                if fname == exe_name || fname == name || (fname.starts_with(&prefix) && fname.ends_with(".exe")) {
                     return Ok(entry.path().to_string_lossy().to_string());
                 }
             }
@@ -40,13 +42,17 @@ pub fn get_ffmpeg_path(_app: &AppHandle) -> Result<String, String> {
         if let Ok(entries) = std::fs::read_dir(&dev_binaries) {
             for entry in entries.flatten() {
                 let fname = entry.file_name().to_string_lossy().to_string();
-                if fname.starts_with("ffmpeg-") && fname.ends_with(".exe") {
+                if fname == exe_name || fname == name || (fname.starts_with(&prefix) && fname.ends_with(".exe")) {
                     return Ok(entry.path().to_string_lossy().to_string());
                 }
             }
         }
     }
     
-    // Fallback if we cannot locate it dynamically
-    Ok("ffmpeg".to_string())
+    // Fallback
+    Ok(name.to_string())
+}
+
+pub fn get_ffmpeg_path(_app: &AppHandle) -> Result<String, String> {
+    resolve_binary_path("ffmpeg")
 }

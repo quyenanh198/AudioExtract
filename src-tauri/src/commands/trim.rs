@@ -9,10 +9,10 @@ pub async fn trim_audio(
     start_time: f64,
     end_time: f64,
 ) -> Result<(), String> {
+    let ffmpeg_path = crate::utils::path_resolver::resolve_binary_path("ffmpeg")?;
     let cmd = app
         .shell()
-        .sidecar("binaries/ffmpeg")
-        .map_err(|e| e.to_string())?
+        .command(ffmpeg_path)
         .args([
             "-i",
             &input_path,

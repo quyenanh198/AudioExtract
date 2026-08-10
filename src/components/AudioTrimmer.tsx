@@ -9,9 +9,10 @@ interface AudioTrimmerProps {
   audioUrl: string | null;
   duration: number;
   onTrimChange: (start: number | undefined, end: number | undefined) => void;
+  onDurationLoaded?: (duration: number) => void;
 }
 
-export const AudioTrimmer: React.FC<AudioTrimmerProps> = ({ audioUrl, duration, onTrimChange }) => {
+export const AudioTrimmer: React.FC<AudioTrimmerProps> = ({ audioUrl, duration, onTrimChange, onDurationLoaded }) => {
   const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
@@ -43,6 +44,10 @@ export const AudioTrimmer: React.FC<AudioTrimmerProps> = ({ audioUrl, duration, 
     ws.load(audioUrl);
 
     ws.on('ready', () => {
+      const dur = ws.getDuration();
+      if (onDurationLoaded) {
+        onDurationLoaded(dur);
+      }
       if (!useFullTrack) {
         regions.addRegion({
           start: startTime,

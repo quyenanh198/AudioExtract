@@ -45,12 +45,12 @@ pub struct DownloadProgressEvent {
 pub async fn download_audio(
     app: AppHandle,
     state: tauri::State<'_, AppState>,
+    task_id: String,
     url: String,
     format: String,
     quality: String,
     output_dir: String,
-) -> Result<String, String> {
-    let task_id = Uuid::new_v4().to_string();
+) -> Result<(), String> {
     let ffmpeg_path = get_ffmpeg_path(&app)?;
 
     let mut args = vec![
@@ -68,10 +68,10 @@ pub async fn download_audio(
 
     args.push(url.clone());
 
+    let yt_dlp_path = crate::utils::path_resolver::resolve_binary_path("yt-dlp")?;
     let cmd = app
         .shell()
-        .sidecar("binaries/yt-dlp")
-        .map_err(|e| e.to_string())?
+        .command(yt_dlp_path)
         .args(args);
 
     let (mut rx, child) = cmd.spawn().map_err(|e| e.to_string())?;
@@ -159,7 +159,7 @@ pub async fn download_audio(
         }
     });
 
-    Ok(task_id)
+    Ok(())
 }
 
 #[tauri::command]
