@@ -51,16 +51,38 @@ describe('Audio/Video mode toggle', () => {
     expect(screen.queryByText('Format')).not.toBeInTheDocument();
     expect(screen.queryByText('Quality')).not.toBeInTheDocument();
 
-    // Note: the brief's /extract|download/i regex also matches the "Extract"
-    // nav tab, causing a "multiple elements found" error. Narrow to the
-    // primary submit button's full label, "Extract Audio".
-    fireEvent.click(screen.getByRole('button', { name: /extract audio/i }));
+    // Note: the submit button's label is mode-dependent ("Extract Audio" vs.
+    // "Download Video" — see final-review-fix-report.md, finding #4), so a
+    // text-based role query would need to track that. Select by the stable
+    // data-testid instead.
+    fireEvent.click(screen.getByTestId('submit-media-btn'));
 
     await waitFor(() => {
       expect(invokeMock).toHaveBeenCalledWith('download_media', expect.objectContaining({
         mode: 'video',
         format: undefined,
         quality: undefined,
+      }));
+    });
+  });
+
+  it('sends mode: "audio" with format/quality when Audio (the default) is submitted', async () => {
+    render(<App />);
+
+    const urlInput = screen.getByPlaceholderText(/paste/i);
+    fireEvent.change(urlInput, { target: { value: 'https://youtube.com/watch?v=1' } });
+    fireEvent.submit(urlInput.closest('form')!);
+
+    await waitFor(() => expect(screen.getByText('Test Video')).toBeInTheDocument());
+
+    // Mode stays on the default "Audio" — no toggle click.
+    fireEvent.click(screen.getByTestId('submit-media-btn'));
+
+    await waitFor(() => {
+      expect(invokeMock).toHaveBeenCalledWith('download_media', expect.objectContaining({
+        mode: 'audio',
+        format: expect.any(String),
+        quality: expect.any(String),
       }));
     });
   });

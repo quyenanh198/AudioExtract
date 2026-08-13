@@ -187,6 +187,17 @@ button {
   color: var(--color-text-primary);
 }
 
+.btn-ghost.selected {
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-ghost.selected:hover {
+  background: var(--color-accent-hover);
+  color: #fff;
+}
+
 .input-field {
   width: 100%;
   background: rgba(0, 0, 0, 0.2);

@@ -21,6 +21,7 @@ export interface DownloadHistoryItem {
   id: string;
   title: string;
   url: string;
+  mode: 'audio' | 'video';
   outputPath: string;
   fileSize: number;
   completedAt: number;

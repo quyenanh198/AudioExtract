@@ -100,6 +100,7 @@ export const DownloadHistory: React.FC = () => {
                 <div className="history-item-info">
                   <h4>{item.title}</h4>
                   <div className="history-meta">
+                    <span className="badge">{item.mode === 'video' ? t('mode.video', 'Video') : t('mode.audio', 'Audio')}</span>
                     <span className="badge">{formatBytes(item.fileSize)}</span>
                     <span>{formatDate(item.completedAt)}</span>
                   </div>

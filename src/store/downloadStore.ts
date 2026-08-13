@@ -41,6 +41,7 @@ export const useDownloadStore = create<DownloadStore>()(
             id: task.id,
             title: task.title || 'Unknown Title',
             url: task.url,
+            mode: task.mode,
             outputPath,
             fileSize,
             completedAt: Date.now()

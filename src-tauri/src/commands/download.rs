@@ -80,6 +80,101 @@ pub fn build_video_args(ffmpeg_path: &str, output_dir: &str, url: &str) -> Vec<S
     ]
 }
 
+/// The kind of yt-dlp output line a destination path was parsed from.
+/// `Merger` always outranks the others: `-f bestvideo+bestaudio` produces a
+/// `[download] Destination:` line for the video-only fragment, another for
+/// the audio-only fragment, and only then a `[Merger] Merging formats into
+/// "…"` line once both are muxed — after which yt-dlp deletes the fragment
+/// files the `[download]` lines pointed at.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DestinationKind {
+    ExtractAudio,
+    Download,
+    Merger,
+}
+
+/// Parses a single line of yt-dlp output for a destination-path
+/// announcement, returning the path and which kind of line produced it.
+/// Pure and unit-testable in isolation from the streaming event loop.
+pub fn parse_output_destination(line: &str) -> Option<(DestinationKind, String)> {
+    const MERGER_MARKER: &str = "[Merger] Merging formats into \"";
+    const EXTRACT_AUDIO_MARKER: &str = "[ExtractAudio] Destination: ";
+    const DOWNLOAD_MARKER: &str = "[download] Destination: ";
+
+    if let Some(idx) = line.find(MERGER_MARKER) {
+        let rest = &line[idx + MERGER_MARKER.len()..];
+        let end = rest.find('"')?;
+        let path = rest[..end].to_string();
+        return if path.is_empty() { None } else { Some((DestinationKind::Merger, path)) };
+    }
+
+    if line.contains(EXTRACT_AUDIO_MARKER) {
+        let path = line.split(EXTRACT_AUDIO_MARKER).nth(1).unwrap_or("").trim().to_string();
+        return if path.is_empty() { None } else { Some((DestinationKind::ExtractAudio, path)) };
+    }
+
+    if line.contains(DOWNLOAD_MARKER) {
+        let path = line.split(DOWNLOAD_MARKER).nth(1).unwrap_or("").trim().to_string();
+        return if path.is_empty() { None } else { Some((DestinationKind::Download, path)) };
+    }
+
+    None
+}
+
+/// Tracks the "final" output path across a stream of yt-dlp lines, applying
+/// the priority a `[Merger] Merging formats into "…"` line takes over
+/// `[download]`/`[ExtractAudio] Destination:` lines once seen (see
+/// `DestinationKind`). Once a merger line has been observed, later
+/// `[download] Destination:` lines (there normally aren't any, but the
+/// guard is cheap) no longer overwrite it.
+#[derive(Default)]
+pub struct OutputPathTracker {
+    path: Option<String>,
+    has_merger: bool,
+}
+
+impl OutputPathTracker {
+    pub fn observe_line(&mut self, line: &str) {
+        if let Some((kind, path)) = parse_output_destination(line) {
+            if kind == DestinationKind::Merger {
+                self.path = Some(path);
+                self.has_merger = true;
+            } else if !self.has_merger {
+                self.path = Some(path);
+            }
+        }
+    }
+
+    pub fn into_path(self) -> Option<String> {
+        self.path
+    }
+}
+
+/// Builds the yt-dlp argument list for the requested `mode`, dispatching to
+/// `build_video_args`/`build_audio_args`. Pure and unit-testable in
+/// isolation from `download_media`'s Tauri/process-spawning plumbing.
+/// Any `mode` other than the two known values is a caller bug (e.g. a stale
+/// frontend build sending an old value) and must fail loudly rather than
+/// silently falling back to audio.
+pub fn build_args_for_mode(
+    mode: &str,
+    format: Option<String>,
+    quality: Option<String>,
+    ffmpeg_path: &str,
+    output_dir: &str,
+    url: &str,
+) -> Result<Vec<String>, String> {
+    if mode == "video" {
+        Ok(build_video_args(ffmpeg_path, output_dir, url))
+    } else if mode == "audio" {
+        let format = format.ok_or("format is required for audio mode")?;
+        let quality = quality.ok_or("quality is required for audio mode")?;
+        Ok(build_audio_args(&format, &quality, ffmpeg_path, output_dir, url))
+    } else {
+        Err(format!("unknown mode: {}", mode))
+    }
+}
+
 #[tauri::command]
 pub async fn download_media(
     app: AppHandle,
@@ -94,13 +189,7 @@ pub async fn download_media(
     let ffmpeg_path = get_ffmpeg_path(&app)?;
     let yt_dlp_path = crate::utils::path_resolver::resolve_binary_path("yt-dlp")?;
 
-    let args = if mode == "video" {
-        build_video_args(&ffmpeg_path, &output_dir, &url)
-    } else {
-        let format = format.ok_or("format is required for audio mode")?;
-        let quality = quality.ok_or("quality is required for audio mode")?;
-        build_audio_args(&format, &quality, &ffmpeg_path, &output_dir, &url)
-    };
+    let args = build_args_for_mode(&mode, format, quality, &ffmpeg_path, &output_dir, &url)?;
 
     let cmd = app.shell().command(yt_dlp_path).args(args);
     let (rx, child) = cmd.spawn().map_err(|e| e.to_string())?;
@@ -115,7 +204,7 @@ pub async fn download_media(
     let downloads_arc = state.downloads.clone();
 
     tauri::async_runtime::spawn(async move {
-        let mut final_output_path = None;
+        let mut output_tracker = OutputPathTracker::default();
         let mut error_msg = String::new();
 
         let exit_code = drain_command_events(rx, |line| match line {
@@ -127,13 +216,7 @@ pub async fn download_media(
                     });
                 }
 
-                if line.contains("[ExtractAudio] Destination: ") {
-                    let path = line.split("[ExtractAudio] Destination: ").nth(1).unwrap_or("").trim().to_string();
-                    if !path.is_empty() { final_output_path = Some(path); }
-                } else if line.contains("[download] Destination: ") {
-                    let path = line.split("[download] Destination: ").nth(1).unwrap_or("").trim().to_string();
-                    if !path.is_empty() { final_output_path = Some(path); }
-                }
+                output_tracker.observe_line(&line);
             }
             CommandLine::Stderr(line) => {
                 if line.to_lowercase().contains("error") {
@@ -163,6 +246,7 @@ pub async fn download_media(
                 error: Some(error_msg),
             });
         } else {
+            let final_output_path = output_tracker.into_path();
             let mut size = None;
             if let Some(ref path) = final_output_path {
                 if let Ok(metadata) = std::fs::metadata(path) {
@@ -257,5 +341,92 @@ mod tests {
         let args = build_video_args("/path/to/ffmpeg", "/out", "https://example.com/v");
         assert!(!args.contains(&"--audio-quality".to_string()));
         assert!(!args.iter().any(|a| a.starts_with("--format-sort")));
+    }
+
+    #[test]
+    fn build_args_for_mode_dispatches_to_video_args() {
+        let args = build_args_for_mode("video", None, None, "/path/to/ffmpeg", "/out", "https://example.com/v").unwrap();
+        assert_eq!(args, build_video_args("/path/to/ffmpeg", "/out", "https://example.com/v"));
+    }
+
+    #[test]
+    fn build_args_for_mode_dispatches_to_audio_args() {
+        let args = build_args_for_mode(
+            "audio",
+            Some("mp3".to_string()),
+            Some("320".to_string()),
+            "/path/to/ffmpeg",
+            "/out",
+            "https://example.com/v",
+        )
+        .unwrap();
+        assert_eq!(args, build_audio_args("mp3", "320", "/path/to/ffmpeg", "/out", "https://example.com/v"));
+    }
+
+    #[test]
+    fn build_args_for_mode_rejects_unknown_mode_instead_of_defaulting_to_audio() {
+        let result = build_args_for_mode("bogus", None, None, "/path/to/ffmpeg", "/out", "https://example.com/v");
+        assert_eq!(result, Err("unknown mode: bogus".to_string()));
+    }
+
+    #[test]
+    fn parse_output_destination_handles_extract_audio_line() {
+        let result = parse_output_destination("[ExtractAudio] Destination: /out/Song.mp3");
+        assert_eq!(result, Some((DestinationKind::ExtractAudio, "/out/Song.mp3".to_string())));
+    }
+
+    #[test]
+    fn parse_output_destination_handles_plain_download_line() {
+        let result = parse_output_destination("[download] Destination: /out/Video.mp4");
+        assert_eq!(result, Some((DestinationKind::Download, "/out/Video.mp4".to_string())));
+    }
+
+    #[test]
+    fn parse_output_destination_handles_merger_line_and_strips_quotes() {
+        let result = parse_output_destination("[Merger] Merging formats into \"/out/Title.mp4\"");
+        assert_eq!(result, Some((DestinationKind::Merger, "/out/Title.mp4".to_string())));
+    }
+
+    #[test]
+    fn parse_output_destination_returns_none_for_unrelated_line() {
+        assert_eq!(parse_output_destination("[youtube] Extracting URL"), None);
+    }
+
+    #[test]
+    fn output_path_tracker_prefers_a_plain_extract_audio_destination() {
+        let mut tracker = OutputPathTracker::default();
+        tracker.observe_line("[ExtractAudio] Destination: /out/Song.mp3");
+        assert_eq!(tracker.into_path(), Some("/out/Song.mp3".to_string()));
+    }
+
+    #[test]
+    fn output_path_tracker_handles_single_stream_download_destination() {
+        let mut tracker = OutputPathTracker::default();
+        tracker.observe_line("[download] Destination: /out/Video.mp4");
+        assert_eq!(tracker.into_path(), Some("/out/Video.mp4".to_string()));
+    }
+
+    #[test]
+    fn output_path_tracker_prefers_merger_line_over_fragment_download_lines() {
+        // Reproduces the `-f bestvideo+bestaudio` sequence: a download
+        // destination for the video-only fragment, then one for the
+        // audio-only fragment, then the merger announcing the final muxed
+        // file — whose path is the only one still on disk once yt-dlp
+        // deletes the intermediate fragments.
+        let mut tracker = OutputPathTracker::default();
+        tracker.observe_line("[download] Destination: /out/Title.f299.mp4");
+        tracker.observe_line("[download] Destination: /out/Title.f140.m4a");
+        tracker.observe_line("[Merger] Merging formats into \"/out/Title.mp4\"");
+
+        assert_eq!(tracker.into_path(), Some("/out/Title.mp4".to_string()));
+    }
+
+    #[test]
+    fn output_path_tracker_ignores_download_lines_that_arrive_after_the_merger_line() {
+        let mut tracker = OutputPathTracker::default();
+        tracker.observe_line("[Merger] Merging formats into \"/out/Title.mp4\"");
+        tracker.observe_line("[download] Destination: /out/Title.f299.mp4");
+
+        assert_eq!(tracker.into_path(), Some("/out/Title.mp4".to_string()));
     }
 }

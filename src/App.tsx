@@ -492,7 +492,10 @@ export default function App() {
                   <div className="extraction-progress-card glass-panel" style={{ padding: 'var(--spacing-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-xs)' }}>
                       <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        {currentTask.status === 'downloading' ? <FiDownload /> : <FiAlertCircle />} Extraction Progress
+                        {currentTask.status === 'downloading' ? <FiDownload /> : <FiAlertCircle />}{' '}
+                        {currentTask.mode === 'video'
+                          ? t('extract.videoProgressTitle', 'Download Progress')
+                          : t('extract.audioProgressTitle', 'Extraction Progress')}
                       </span>
                       <span style={{ color: 'var(--color-accent)' }}>
                         {currentTask.status === 'queued' && 'Queued...'}
@@ -505,19 +508,25 @@ export default function App() {
 
                     {/* Progress Slider */}
                     <div style={{ background: 'rgba(255,255,255,0.05)', height: '8px', borderRadius: '4px', overflow: 'hidden', margin: '12px 0' }}>
-                      <div 
-                        style={{ 
-                          width: `${currentTask.progress?.percent || (currentTask.status === 'completed' ? 100 : 0)}%`, 
-                          background: 'linear-gradient(90deg, #059669, #10b981)', 
-                          height: '100%', 
-                          transition: 'width 0.2s' 
+                      <div
+                        style={{
+                          width: `${currentTask.progress?.percent || (currentTask.status === 'completed' ? 100 : 0)}%`,
+                          background: 'linear-gradient(90deg, #059669, #10b981)',
+                          height: '100%',
+                          transition: 'width 0.2s'
                         }}
                       />
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                      <span>Extracting: {videoInfo?.title}</span>
-                      <span>Format: {selectedFormat} • Quality: {selectedQuality} kbps • Channels: Stereo</span>
+                      <span>
+                        {currentTask.mode === 'video'
+                          ? t('extract.videoInProgressLabel', 'Downloading')
+                          : t('extract.audioInProgressLabel', 'Extracting')}: {videoInfo?.title}
+                      </span>
+                      {currentTask.mode === 'audio' && (
+                        <span>Format: {selectedFormat} • Quality: {selectedQuality} kbps • Channels: Stereo</span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -603,6 +612,7 @@ export default function App() {
                       <button
                         type="button"
                         className={`btn-ghost ${selectedMode === 'audio' ? 'selected' : ''}`}
+                        aria-pressed={selectedMode === 'audio'}
                         onClick={() => setSelectedMode('audio')}
                       >
                         {t('mode.audio', 'Audio')}
@@ -610,6 +620,7 @@ export default function App() {
                       <button
                         type="button"
                         className={`btn-ghost ${selectedMode === 'video' ? 'selected' : ''}`}
+                        aria-pressed={selectedMode === 'video'}
                         onClick={() => setSelectedMode('video')}
                       >
                         {t('mode.video', 'Video')}
@@ -718,18 +729,24 @@ export default function App() {
                   />
                 </div>
 
-                <button 
-                  className="btn-primary" 
+                <button
+                  className="btn-primary"
+                  data-testid="submit-media-btn"
                   style={{ width: '100%', padding: '12px', fontSize: '1rem' }}
                   onClick={handleExtractAudio}
                   disabled={!videoInfo || !!activeTaskId}
                 >
-                  <FiDownload /> Extract Audio
+                  <FiDownload />{' '}
+                  {selectedMode === 'video'
+                    ? t('extract.videoButton', 'Download Video')
+                    : t('extract.audioButton', 'Extract Audio')}
                 </button>
 
-                <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
-                  Estimated size: {getEstimatedSize()}
-                </div>
+                {selectedMode === 'audio' && (
+                  <div style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
+                    Estimated size: {getEstimatedSize()}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}

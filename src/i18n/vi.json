@@ -19,6 +19,18 @@
     "quality": "Chất lượng",
     "format": "Định dạng"
   },
+  "mode": {
+    "audio": "Âm thanh",
+    "video": "Video"
+  },
+  "extract": {
+    "audioButton": "Trích xuất âm thanh",
+    "videoButton": "Tải video",
+    "audioProgressTitle": "Tiến trình trích xuất",
+    "videoProgressTitle": "Tiến trình tải xuống",
+    "audioInProgressLabel": "Đang trích xuất",
+    "videoInProgressLabel": "Đang tải xuống"
+  },
   "trimmer": {
     "title": "Cắt âm thanh",
     "start": "Bắt đầu",

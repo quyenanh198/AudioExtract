@@ -19,6 +19,18 @@
     "quality": "Quality",
     "format": "Format"
   },
+  "mode": {
+    "audio": "Audio",
+    "video": "Video"
+  },
+  "extract": {
+    "audioButton": "Extract Audio",
+    "videoButton": "Download Video",
+    "audioProgressTitle": "Extraction Progress",
+    "videoProgressTitle": "Download Progress",
+    "audioInProgressLabel": "Extracting",
+    "videoInProgressLabel": "Downloading"
+  },
   "trimmer": {
     "title": "Trim Audio",
     "start": "Start",
