@@ -42,6 +42,29 @@ pub struct DownloadProgressEvent {
     pub progress: DownloadProgress,
 }
 
+pub fn build_audio_args(format: &str, quality: &str, ffmpeg_path: &str, output_dir: &str, url: &str) -> Vec<String> {
+    let mut args = vec![
+        "--newline".to_string(),
+        "--extract-audio".to_string(),
+        "--audio-format".to_string(),
+        format.to_string(),
+    ];
+
+    let is_lossless = format.eq_ignore_ascii_case("flac") || format.eq_ignore_ascii_case("wav");
+    if !is_lossless {
+        args.push("--audio-quality".to_string());
+        args.push(quality.to_string());
+    }
+
+    args.push("--ffmpeg-location".to_string());
+    args.push(ffmpeg_path.to_string());
+    args.push("-o".to_string());
+    args.push(format!("{}/%(title)s.%(ext)s", output_dir));
+    args.push(url.to_string());
+
+    args
+}
+
 #[tauri::command]
 pub async fn download_audio(
     app: AppHandle,
@@ -165,5 +188,41 @@ pub async fn cancel_download(
         Ok(())
     } else {
         Err("Task not found".to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn build_audio_args_includes_quality_flag_for_lossy_format() {
+        let args = build_audio_args("mp3", "320", "/path/to/ffmpeg", "/out", "https://example.com/v");
+
+        assert_eq!(
+            args,
+            vec![
+                "--newline".to_string(),
+                "--extract-audio".to_string(),
+                "--audio-format".to_string(),
+                "mp3".to_string(),
+                "--audio-quality".to_string(),
+                "320".to_string(),
+                "--ffmpeg-location".to_string(),
+                "/path/to/ffmpeg".to_string(),
+                "-o".to_string(),
+                "/out/%(title)s.%(ext)s".to_string(),
+                "https://example.com/v".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn build_audio_args_omits_quality_flag_for_lossless_format() {
+        let flac_args = build_audio_args("flac", "320", "/path/to/ffmpeg", "/out", "https://example.com/v");
+        assert!(!flac_args.contains(&"--audio-quality".to_string()));
+
+        let wav_args = build_audio_args("wav", "320", "/path/to/ffmpeg", "/out", "https://example.com/v");
+        assert!(!wav_args.contains(&"--audio-quality".to_string()));
     }
 }
