@@ -1,0 +1,16 @@
+{
+  "ad5822030011deec0": {"eval": "implicit-business-free-tier-cut", "config": "with_skill"},
+  "a83fc86755927a6fa": {"eval": "implicit-business-free-tier-cut", "config": "without_skill"},
+  "a5f2454a16fe93a70": {"eval": "implicit-tech-rust-rewrite", "config": "with_skill"},
+  "a4bc787f4fc435d84": {"eval": "implicit-tech-rust-rewrite", "config": "without_skill"},
+  "a409c6f59de5fd057": {"eval": "explicit-career-quit-startup", "config": "with_skill"},
+  "aab0b5543e1023eb7": {"eval": "explicit-career-quit-startup", "config": "without_skill"},
+  "af73c46e1cae53ece": {"eval": "solid-idea-rate-limiting", "config": "with_skill"},
+  "a0a23a271c2399548": {"eval": "solid-idea-rate-limiting", "config": "without_skill"},
+  "abd8077543a26ad0b": {"eval": "sensitive-family-loss", "config": "with_skill"},
+  "a36cdee14275f8828": {"eval": "sensitive-family-loss", "config": "without_skill"},
+  "a6b06d4fade0efdb6": {"eval": "irreversible-cafe-lease", "config": "with_skill"},
+  "ab8810abfdde90d4c": {"eval": "irreversible-cafe-lease", "config": "without_skill"},
+  "a5fdcbdc22f6f4497": {"eval": "boundary-claude-plan-upgrade", "config": "with_skill"},
+  "a1db93eb789850120": {"eval": "boundary-claude-plan-upgrade", "config": "without_skill"}
+}

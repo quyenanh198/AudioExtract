@@ -1,0 +1,38 @@
+{
+  "expectations": [
+    {
+      "text": "Output steelmans the reasoning for considering Rust before critiquing",
+      "passed": true,
+      "evidence": "'Rust (không GC, zero-cost abstraction, xử lý concurrency hiệu quả) về lý thuyết có thể kéo latency xuống đáng kể... đó là lý do hợp lý để nghĩ tới.'"
+    },
+    {
+      "text": "Output flags the lack of profiling/evidence that language choice is actually the bottleneck",
+      "passed": true,
+      "evidence": "'Bạn đã profile/trace để biết 800ms đó nằm ở đâu... chưa? Nếu chưa, đây là rủi ro lớn nhất.'"
+    },
+    {
+      "text": "Output flags the team's lack of Rust production experience as a risk",
+      "passed": true,
+      "evidence": "Describes specific novice-Rust failure modes (blocking executor, Arc<Mutex<>> overuse, wrong tokio/thread-pool choice)."
+    },
+    {
+      "text": "Output proposes a concrete alternative (e.g. profile first, incremental/partial rewrite) instead of a binary yes/no",
+      "passed": true,
+      "evidence": "Two-step plan: add APM/tracing, try cheap fixes, then strangler-pattern rewrite of only a CPU-bound endpoint as a pilot."
+    },
+    {
+      "text": "Output does not simply endorse a full rewrite without qualification",
+      "passed": true,
+      "evidence": "Explicitly frames full rewrite as the risky, premature option."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 54.4
+  }
+}

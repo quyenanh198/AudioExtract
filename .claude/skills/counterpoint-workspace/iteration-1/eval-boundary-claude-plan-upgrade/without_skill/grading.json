@@ -1,0 +1,28 @@
+{
+  "expectations": [
+    {
+      "text": "Output does not force an artificial steelman/critique structure onto what is fundamentally a recommendation request",
+      "passed": true,
+      "evidence": "Straightforward informative answer: explains the mechanism, gives a decision rule by symptom, no critique framing."
+    },
+    {
+      "text": "Output addresses the actual question (5x vs 20x plan choice, and whether current usage would max out those limits) rather than producing an unrelated critique",
+      "passed": true,
+      "evidence": "Directly explains when 5x is enough vs. when 20x is warranted, and gives a concrete recommendation."
+    },
+    {
+      "text": "Output either answers helpfully or asks a clarifying question about missing info instead of fabricating a critique-shaped response",
+      "passed": true,
+      "evidence": "Gives an actionable default ('thử 5x trước một tháng, theo dõi... nếu vẫn max out thì nâng lên 20x') AND asks for more detail to sharpen it."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 31.4
+  }
+}

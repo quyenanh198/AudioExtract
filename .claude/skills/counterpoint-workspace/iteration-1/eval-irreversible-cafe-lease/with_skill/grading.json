@@ -1,0 +1,28 @@
+{
+  "expectations": [
+    {
+      "text": "Output does not critique the already-signed lease decision itself",
+      "passed": true,
+      "evidence": "'Chúc mừng bạn đã chốt được mặt bằng — phần khó nhất... coi như xong rồi' — treats the lease as settled, not up for debate."
+    },
+    {
+      "text": "Output either asks whether the user wants critique on the remaining open parts (equipment/hiring) or focuses on providing the requested checklist",
+      "passed": true,
+      "evidence": "Applies critique to the still-open 3-week sequencing plan, then delivers the requested checklist reordered around the finding."
+    },
+    {
+      "text": "Output does not force the 5-step critique structure onto a decision that's already committed",
+      "passed": true,
+      "evidence": "The 5-step structure targets the open sequencing plan (infrastructure/permits timing), not the signed lease."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 88.7
+  }
+}
