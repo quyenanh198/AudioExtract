@@ -65,6 +65,21 @@ pub fn build_audio_args(format: &str, quality: &str, ffmpeg_path: &str, output_d
     args
 }
 
+pub fn build_video_args(ffmpeg_path: &str, output_dir: &str, url: &str) -> Vec<String> {
+    vec![
+        "--newline".to_string(),
+        "-f".to_string(),
+        "bestvideo+bestaudio/best".to_string(),
+        "--merge-output-format".to_string(),
+        "mp4".to_string(),
+        "--ffmpeg-location".to_string(),
+        ffmpeg_path.to_string(),
+        "-o".to_string(),
+        format!("{}/%(title)s.%(ext)s", output_dir),
+        url.to_string(),
+    ]
+}
+
 #[tauri::command]
 pub async fn download_audio(
     app: AppHandle,
@@ -224,5 +239,33 @@ mod tests {
 
         let wav_args = build_audio_args("wav", "320", "/path/to/ffmpeg", "/out", "https://example.com/v");
         assert!(!wav_args.contains(&"--audio-quality".to_string()));
+    }
+
+    #[test]
+    fn build_video_args_requests_best_streams_muxed_to_mp4() {
+        let args = build_video_args("/path/to/ffmpeg", "/out", "https://example.com/v");
+
+        assert_eq!(
+            args,
+            vec![
+                "--newline".to_string(),
+                "-f".to_string(),
+                "bestvideo+bestaudio/best".to_string(),
+                "--merge-output-format".to_string(),
+                "mp4".to_string(),
+                "--ffmpeg-location".to_string(),
+                "/path/to/ffmpeg".to_string(),
+                "-o".to_string(),
+                "/out/%(title)s.%(ext)s".to_string(),
+                "https://example.com/v".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn build_video_args_never_contains_a_quality_flag() {
+        let args = build_video_args("/path/to/ffmpeg", "/out", "https://example.com/v");
+        assert!(!args.contains(&"--audio-quality".to_string()));
+        assert!(!args.iter().any(|a| a.starts_with("--format-sort")));
     }
 }
