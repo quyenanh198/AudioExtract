@@ -72,7 +72,13 @@ export const ExtractOptions: React.FC<ExtractOptionsProps> = ({
   onSubmit,
 }) => {
   const { t } = useTranslation();
-  const [timeError, setTimeError] = useState<string | null>(null);
+  // Kept separate rather than one shared error: each TimecodeInput reports
+  // its own validity on every commit (including a plain re-commit of an
+  // already-valid draft), so a single shared setter let the valid field's
+  // "I'm fine" clobber the invalid field's still-active error.
+  const [startTimeError, setStartTimeError] = useState<string | null>(null);
+  const [endTimeError, setEndTimeError] = useState<string | null>(null);
+  const timeError = startTimeError || endTimeError;
 
   const isAudio = mode === 'audio';
   const isLossless = LOSSLESS_FORMATS.includes(format);
@@ -228,7 +234,7 @@ export const ExtractOptions: React.FC<ExtractOptionsProps> = ({
                   max={duration || undefined}
                   disabled={!trimEnabled || disabled}
                   onChange={onStartTimeChange}
-                  onValidityChange={setTimeError}
+                  onValidityChange={setStartTimeError}
                   invalidMessage={t('trimmer.invalid', 'Use mm:ss')}
                   aria-label={t('trimmer.start', 'Start')}
                 />
@@ -243,7 +249,7 @@ export const ExtractOptions: React.FC<ExtractOptionsProps> = ({
                   max={duration || undefined}
                   disabled={!trimEnabled || disabled}
                   onChange={onEndTimeChange}
-                  onValidityChange={setTimeError}
+                  onValidityChange={setEndTimeError}
                   invalidMessage={t('trimmer.invalid', 'Use mm:ss')}
                   aria-label={t('trimmer.end', 'End')}
                 />
