@@ -40,6 +40,19 @@ npm run tauri build
 - **Frontend** (Vitest): `npm test`
 - **Backend** (Rust, built-in `cargo test`, no extra dependency): `cd src-tauri && cargo test`
 
+## AI agent setup
+
+This repo auto-loads a couple of things for AI coding agents at session start:
+
+- **`multi-ai-skills`** — a portable Agent Skills bundle shared across Claude Code, Gemini CLI, Antigravity, and other Agent Skills-compatible tools. Enabled for every session in this repo.
+- **`caveman`** — a terse, token-efficient response mode. Active by default (no need to run `/caveman`); say "stop caveman" or "normal mode" to turn it off for a session.
+
+| Tool | Config |
+|---|---|
+| Claude Code | `.claude/settings.json` (`SessionStart` hooks) + `.claude/skills/caveman/` |
+| Gemini CLI | `GEMINI.md` (repo root, auto-concatenated into context) |
+| Google Antigravity | `AGENTS.md` (repo root) + `.agents/skills/caveman/` |
+
 ## Project structure
 
 ```
