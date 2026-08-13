@@ -38,6 +38,7 @@ export default function App() {
   // Extraction options
   const [selectedFormat, setSelectedFormat] = useState('MP3');
   const [selectedQuality, setSelectedQuality] = useState('320');
+  const [selectedMode, setSelectedMode] = useState<'audio' | 'video'>('audio');
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -222,6 +223,9 @@ export default function App() {
 
     const format = selectedFormat.toLowerCase();
     const qualityStr = selectedQuality === '320' ? '0' : selectedQuality === '192' ? '2' : '5';
+    const mediaModeParams = selectedMode === 'video'
+      ? { mode: 'video' as const }
+      : { mode: 'audio' as const, format, quality: qualityStr };
 
     // 1. Process URL downloads
     if (currentUrl) {
@@ -234,6 +238,7 @@ export default function App() {
                 id: tId,
                 url: item.originalUrl || currentUrl,
                 title: item.title,
+                mode: selectedMode,
                 status: 'queued',
                 createdAt: Date.now()
               });
@@ -243,8 +248,7 @@ export default function App() {
                 await startDownload({
                   taskId: tId,
                   url: item.originalUrl || currentUrl,
-                  format,
-                  quality: qualityStr,
+                  ...mediaModeParams,
                   outputDir: settings.outputDir
                 });
               } catch (err) {
@@ -268,6 +272,7 @@ export default function App() {
         id: singleTaskId,
         url: currentUrl,
         title: videoInfo.title,
+        mode: selectedMode,
         status: 'queued',
         createdAt: Date.now()
       });
@@ -277,8 +282,7 @@ export default function App() {
         await startDownload({
           taskId: singleTaskId,
           url: currentUrl,
-          format,
-          quality: qualityStr,
+          ...mediaModeParams,
           outputDir: settings.outputDir
         });
         setTimeout(() => handleReset(), 2000); // Auto-reset after 2 seconds
@@ -295,6 +299,7 @@ export default function App() {
         id: singleTaskId,
         url: localFilePath,
         title: videoInfo.title,
+        mode: 'audio',
         status: 'queued',
         createdAt: Date.now()
       });
@@ -587,44 +592,67 @@ export default function App() {
                 </h4>
 
                 <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
-                  <label style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>Format</label>
-                  <select 
-                    value={selectedFormat} 
-                    onChange={(e) => setSelectedFormat(e.target.value)}
-                    className="input-field"
-                  >
-                    <option value="MP3">MP3</option>
-                    <option value="FLAC">FLAC</option>
-                    <option value="WAV">WAV</option>
-                    <option value="M4A">M4A</option>
-                    <option value="Opus">Opus</option>
-                  </select>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      type="button"
+                      className={`btn-ghost ${selectedMode === 'audio' ? 'selected' : ''}`}
+                      onClick={() => setSelectedMode('audio')}
+                    >
+                      {t('mode.audio', 'Audio')}
+                    </button>
+                    <button
+                      type="button"
+                      className={`btn-ghost ${selectedMode === 'video' ? 'selected' : ''}`}
+                      onClick={() => setSelectedMode('video')}
+                    >
+                      {t('mode.video', 'Video')}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '8px' }}>
-                    <span style={{ color: 'var(--color-text-secondary)' }}>Quality</span>
-                    <span style={{ fontWeight: '600', color: 'var(--color-accent)' }}>{selectedQuality} kbps</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="1" 
-                    max="4" 
-                    step="1"
-                    value={selectedQuality === '64' ? 1 : selectedQuality === '128' ? 2 : selectedQuality === '192' ? 3 : 4}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value);
-                      setSelectedQuality(val === 1 ? '64' : val === 2 ? '128' : val === 3 ? '192' : '320');
-                    }}
-                    style={{ width: '100%', accentColor: 'var(--color-accent)' }}
-                  />
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
-                    <span>64</span>
-                    <span>128</span>
-                    <span>192</span>
-                    <span>320</span>
-                  </div>
-                </div>
+                {selectedMode === 'audio' && (
+                  <>
+                    <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
+                      <label style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', display: 'block', marginBottom: '8px' }}>Format</label>
+                      <select
+                        value={selectedFormat}
+                        onChange={(e) => setSelectedFormat(e.target.value)}
+                        className="input-field"
+                      >
+                        <option value="MP3">MP3</option>
+                        <option value="FLAC">FLAC</option>
+                        <option value="WAV">WAV</option>
+                        <option value="M4A">M4A</option>
+                        <option value="Opus">Opus</option>
+                      </select>
+                    </div>
+
+                    <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '8px' }}>
+                        <span style={{ color: 'var(--color-text-secondary)' }}>Quality</span>
+                        <span style={{ fontWeight: '600', color: 'var(--color-accent)' }}>{selectedQuality} kbps</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="4"
+                        step="1"
+                        value={selectedQuality === '64' ? 1 : selectedQuality === '128' ? 2 : selectedQuality === '192' ? 3 : 4}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          setSelectedQuality(val === 1 ? '64' : val === 2 ? '128' : val === 3 ? '192' : '320');
+                        }}
+                        style={{ width: '100%', accentColor: 'var(--color-accent)' }}
+                      />
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
+                        <span>64</span>
+                        <span>128</span>
+                        <span>192</span>
+                        <span>320</span>
+                      </div>
+                    </div>
+                  </>
+                )}
 
                 <div className="form-group" style={{ marginBottom: 'var(--spacing-lg)' }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
