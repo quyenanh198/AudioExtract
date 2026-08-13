@@ -65,3 +65,32 @@ describe('Audio/Video mode toggle', () => {
     });
   });
 });
+
+describe('Audio quality defaults', () => {
+  beforeEach(() => {
+    invokeMock.mockClear();
+    invokeMock.mockImplementation((cmd: string) => {
+      if (cmd === 'fetch_video_info') {
+        return Promise.resolve([
+          { id: '1', title: 'Test Video', duration: 100, uploader: 'u', platform: 'youtube', originalUrl: 'https://youtube.com/watch?v=1' },
+        ]);
+      }
+      return Promise.resolve(undefined);
+    });
+  });
+
+  it('hides the quality control when a lossless format is selected', async () => {
+    render(<App />);
+
+    const urlInput = screen.getByPlaceholderText(/paste/i);
+    fireEvent.change(urlInput, { target: { value: 'https://youtube.com/watch?v=1' } });
+    fireEvent.submit(urlInput.closest('form')!);
+    await waitFor(() => expect(screen.getByText('Test Video')).toBeInTheDocument());
+
+    expect(screen.getByText('Quality')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByDisplayValue('MP3'), { target: { value: 'FLAC' } });
+
+    expect(screen.queryByText('Quality')).not.toBeInTheDocument();
+  });
+});

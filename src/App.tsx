@@ -635,30 +635,32 @@ export default function App() {
                       </select>
                     </div>
 
-                    <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '8px' }}>
-                        <span style={{ color: 'var(--color-text-secondary)' }}>Quality</span>
-                        <span style={{ fontWeight: '600', color: 'var(--color-accent)' }}>{selectedQuality} kbps</span>
+                    {!['FLAC', 'WAV'].includes(selectedFormat) && (
+                      <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', marginBottom: '8px' }}>
+                          <span style={{ color: 'var(--color-text-secondary)' }}>Quality</span>
+                          <span style={{ fontWeight: '600', color: 'var(--color-accent)' }}>{selectedQuality} kbps</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="1"
+                          max="4"
+                          step="1"
+                          value={selectedQuality === '64' ? 1 : selectedQuality === '128' ? 2 : selectedQuality === '192' ? 3 : 4}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            setSelectedQuality(val === 1 ? '64' : val === 2 ? '128' : val === 3 ? '192' : '320');
+                          }}
+                          style={{ width: '100%', accentColor: 'var(--color-accent)' }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
+                          <span>64</span>
+                          <span>128</span>
+                          <span>192</span>
+                          <span>320</span>
+                        </div>
                       </div>
-                      <input
-                        type="range"
-                        min="1"
-                        max="4"
-                        step="1"
-                        value={selectedQuality === '64' ? 1 : selectedQuality === '128' ? 2 : selectedQuality === '192' ? 3 : 4}
-                        onChange={(e) => {
-                          const val = parseInt(e.target.value);
-                          setSelectedQuality(val === 1 ? '64' : val === 2 ? '128' : val === 3 ? '192' : '320');
-                        }}
-                        style={{ width: '100%', accentColor: 'var(--color-accent)' }}
-                      />
-                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--color-text-secondary)', marginTop: '4px' }}>
-                        <span>64</span>
-                        <span>128</span>
-                        <span>192</span>
-                        <span>320</span>
-                      </div>
-                    </div>
+                    )}
                   </>
                 )}
 
