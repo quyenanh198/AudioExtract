@@ -192,6 +192,9 @@ export default function App() {
     setCurrentUrl('');
     setPreviewAudioUrl(null);
     setVideoInfo(null);
+    // Video mode has no meaning for local-file audio extraction/trimming
+    // (trimAudio always produces audio), so force audio mode here.
+    setSelectedMode('audio');
 
     const name = path.split(/[\\/]/).pop() || path;
     
@@ -591,24 +594,29 @@ export default function App() {
                   ⚙️ Extraction Options
                 </h4>
 
-                <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      type="button"
-                      className={`btn-ghost ${selectedMode === 'audio' ? 'selected' : ''}`}
-                      onClick={() => setSelectedMode('audio')}
-                    >
-                      {t('mode.audio', 'Audio')}
-                    </button>
-                    <button
-                      type="button"
-                      className={`btn-ghost ${selectedMode === 'video' ? 'selected' : ''}`}
-                      onClick={() => setSelectedMode('video')}
-                    >
-                      {t('mode.video', 'Video')}
-                    </button>
+                {/* Mode toggle only applies to URL downloads; local-file
+                    processing always uses trimAudio, which only ever
+                    produces audio. */}
+                {currentUrl && (
+                  <div className="form-group" style={{ marginBottom: 'var(--spacing-md)' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        type="button"
+                        className={`btn-ghost ${selectedMode === 'audio' ? 'selected' : ''}`}
+                        onClick={() => setSelectedMode('audio')}
+                      >
+                        {t('mode.audio', 'Audio')}
+                      </button>
+                      <button
+                        type="button"
+                        className={`btn-ghost ${selectedMode === 'video' ? 'selected' : ''}`}
+                        onClick={() => setSelectedMode('video')}
+                      >
+                        {t('mode.video', 'Video')}
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {selectedMode === 'audio' && (
                   <>
