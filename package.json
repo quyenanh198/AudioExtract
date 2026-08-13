@@ -8,7 +8,9 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "check:contrast": "node tools/contrast.mjs",
+    "shots": "node tools/screenshot.mjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2",
@@ -25,7 +27,6 @@
     "react-i18next": "^15",
     "react-icons": "^5.7.0",
     "uuid": "^11",
-    "wavesurfer.js": "^7",
     "zustand": "^5"
   },
   "devDependencies": {

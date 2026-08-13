@@ -14,6 +14,8 @@ export const useDownload = () => {
       quality: params.quality,
       outputDir: params.outputDir
     });
+    // Note: `mode` only steers what the frontend passes as format/quality
+    // (video mode omits both, so the backend skips --extract-audio).
   };
 
   const cancelDownload = async (taskId: string): Promise<void> => {

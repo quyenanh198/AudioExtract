@@ -1,0 +1,84 @@
+.player .ui-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.player__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.player__labels {
+  min-width: 0;
+}
+
+.player__eyebrow {
+  font-size: var(--text-2xs);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.player__name {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  margin-top: 2px;
+}
+
+.player__transport {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.player__play {
+  --btn-height: 36px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.player__time {
+  font-size: var(--text-xs);
+  color: var(--text);
+  min-width: 42px;
+}
+
+.player__time--muted {
+  color: var(--text-subtle);
+  text-align: right;
+}
+
+.player__seek {
+  flex: 1;
+  min-width: 0;
+}
+
+.player__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.player__volume {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 150px;
+}
+
+.player__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.player__speed {
+  width: 74px;
+  height: 28px;
+  font-size: var(--text-xs);
+}

@@ -1,66 +1,129 @@
 {
   "header": {
-    "title": "AudioExtract",
-    "subtitle": "Trích xuất âm thanh từ video chất lượng cao"
+    "title": "AudioExtract"
   },
-  "urlInput": {
-    "placeholder": "Dán URL video vào đây...",
-    "paste": "Dán",
-    "invalid": "URL không hợp lệ",
-    "fetching": "Đang lấy thông tin..."
+  "nav": {
+    "label": "Điều hướng chính",
+    "home": "Trích xuất",
+    "history": "Thư viện",
+    "settings": "Cài đặt",
+    "activeJobs": "{{count}} tác vụ đang chạy"
   },
-  "videoInfo": {
-    "duration": "Thời lượng",
-    "uploader": "Người tải lên",
-    "platform": "Nền tảng"
+  "theme": {
+    "dark": "Tối",
+    "light": "Sáng",
+    "system": "Theo hệ thống",
+    "toDark": "Chuyển sang giao diện tối",
+    "toLight": "Chuyển sang giao diện sáng"
+  },
+  "source": {
+    "title": "Thêm nguồn video hoặc âm thanh",
+    "subtitle": "Dán link YouTube, Facebook hoặc TikTok — hoặc chọn tệp có sẵn trên máy.",
+    "urlLabel": "Link video",
+    "placeholder": "Dán link video…",
+    "paste": "Dán từ clipboard",
+    "fetch": "Lấy thông tin",
+    "fetching": "Đang lấy…",
+    "browse": "Chọn tệp…",
+    "formats": "MP4, MOV, MKV, WEBM, MP3, WAV, M4A, FLAC, Opus",
+    "invalidUrl": "Đây có vẻ không phải link video.",
+    "fetchFailed": "Không đọc được link này. {{error}}",
+    "sourceTitle": "Nguồn",
+    "playlistTitle": "Danh sách phát",
+    "itemCount": "{{count}} mục",
+    "clear": "Bỏ nguồn"
+  },
+  "options": {
+    "title": "Tuỳ chọn đầu ra",
+    "mode": "Chế độ",
+    "losslessNote": "Định dạng lossless — bitrate lấy theo nguồn.",
+    "length": "Thời lượng",
+    "estimatedSize": "Dung lượng ước tính"
   },
   "formatPicker": {
-    "title": "Định dạng đầu ra",
-    "quality": "Chất lượng",
-    "format": "Định dạng"
+    "format": "Định dạng",
+    "quality": "Chất lượng"
+  },
+  "quality": {
+    "best": "Tốt nhất — 320 kbps",
+    "high": "Cao — 192 kbps",
+    "standard": "Tiêu chuẩn — 128 kbps",
+    "low": "Thấp — 64 kbps"
+  },
+  "mode": {
+    "audio": "Âm thanh",
+    "video": "Video"
+  },
+  "extract": {
+    "audioButton": "Trích xuất âm thanh",
+    "videoButton": "Tải video"
   },
   "trimmer": {
-    "title": "Cắt âm thanh",
+    "title": "Cắt",
+    "enable": "Cắt đoạn",
     "start": "Bắt đầu",
     "end": "Kết thúc",
-    "useFullTrack": "Sử dụng toàn bộ",
-    "preview": "Nghe thử"
+    "sourceLength": "Độ dài nguồn",
+    "invalid": "Dùng định dạng mm:ss",
+    "rangeError": "Thời điểm kết thúc phải sau thời điểm bắt đầu.",
+    "localOnly": "Cắt chỉ áp dụng cho tệp trên máy. Tải về sẽ giữ nguyên toàn bộ."
   },
   "download": {
-    "start": "Tải xuống",
-    "cancel": "Hủy",
-    "progress": "Tiến trình",
-    "speed": "Tốc độ",
-    "eta": "Còn lại",
-    "completed": "Hoàn thành",
-    "error": "Lỗi",
-    "queue": "Đang chờ"
+    "queued": "Đang chờ",
+    "downloading": "Đang tải",
+    "converting": "Đang chuyển đổi",
+    "completed": "Hoàn tất",
+    "completedMessage": "Đã lưu vào thư mục đầu ra.",
+    "cancelled": "Đã huỷ",
+    "cancelledMessage": "Đã huỷ.",
+    "error": "Thất bại",
+    "eta": "Còn"
+  },
+  "player": {
+    "title": "Nghe thử",
+    "play": "Phát",
+    "pause": "Tạm dừng",
+    "seek": "Tua",
+    "volume": "Âm lượng",
+    "mute": "Tắt tiếng",
+    "unmute": "Bật tiếng",
+    "loop": "Lặp lại",
+    "speed": "Tốc độ phát"
   },
   "history": {
-    "title": "Lịch sử tải xuống",
-    "empty": "Chưa có lịch sử nào",
-    "openFile": "Mở tệp",
+    "title": "Thư viện",
+    "empty": "Chưa có gì ở đây",
+    "emptyHint": "Các tệp bạn trích xuất sẽ hiện ở đây.",
+    "noMatches": "Không có kết quả",
+    "noMatchesHint": "Thử từ khoá khác xem sao.",
     "openFolder": "Mở thư mục",
-    "delete": "Xóa",
-    "clear": "Xóa tất cả"
+    "delete": "Xoá khỏi thư viện",
+    "clear": "Xoá tất cả",
+    "clearConfirm": "Xoá toàn bộ?"
   },
   "settings": {
     "title": "Cài đặt",
-    "outputDir": "Thư mục lưu trữ",
+    "outputDir": "Thư mục đầu ra",
+    "outputDirHint": "Nơi lưu các tệp đã hoàn tất.",
     "defaultFormat": "Định dạng mặc định",
     "defaultQuality": "Chất lượng mặc định",
     "theme": "Giao diện",
     "language": "Ngôn ngữ",
-    "autoUpdate": "Tự động cập nhật",
-    "concurrent": "Số lượt tải đồng thời",
-    "browse": "Duyệt"
+    "autoUpdate": "Tự cập nhật yt-dlp",
+    "autoUpdateHint": "Giúp tải về vẫn chạy khi các trang thay đổi.",
+    "concurrent": "Số tải đồng thời",
+    "concurrentHint": "Số mục trong danh sách phát chạy cùng lúc.",
+    "browse": "Chọn",
+    "unsaved": "Có thay đổi chưa lưu"
   },
   "common": {
-    "loading": "Đang tải...",
-    "error": "Lỗi",
-    "success": "Thành công",
-    "cancel": "Hủy",
-    "save": "Lưu",
+    "or": "hoặc",
+    "loading": "Đang tải…",
+    "search": "Tìm kiếm",
+    "cancel": "Huỷ",
+    "confirm": "Xoá",
+    "save": "Lưu thay đổi",
+    "saved": "Đã lưu",
     "close": "Đóng"
   }
 }

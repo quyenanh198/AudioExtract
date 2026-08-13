@@ -1,0 +1,46 @@
+/* Deliberately tighter than the default card: a playlist can queue dozens of
+   these, and at full card padding four of them fill the viewport. */
+.job .ui-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.job--failed {
+  border-color: var(--danger-border);
+}
+
+.job--completed {
+  border-color: var(--accent-soft-border);
+}
+
+.job__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.job__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.job__title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.job__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.job__status svg {
+  width: 12px;
+  height: 12px;
+}

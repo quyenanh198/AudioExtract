@@ -1,197 +1,42 @@
-/* App Layout Configuration matching Mockup */
+/* =========================================================================
+   App shell
+   A fixed header over a single scroll region. Nothing here knows about
+   colors beyond the semantic tokens.
+   ========================================================================= */
 
-.app-layout {
+.app {
   display: flex;
   flex-direction: column;
   height: 100vh;
   width: 100vw;
-  background-color: var(--color-bg-primary);
-  color: var(--color-text-primary);
+  background: var(--canvas);
+  color: var(--text);
   overflow: hidden;
 }
 
-/* App Header styling */
-.app-header {
-  height: 64px;
-  background-color: var(--color-bg-secondary);
-  border-bottom: 1px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 var(--spacing-xl);
-  z-index: 10;
-}
-
-.logo-section {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  font-size: 1.25rem;
-  font-weight: 700;
-  letter-spacing: -0.5px;
-}
-
-.logo-pro {
-  color: #34d399;
-  background: var(--color-accent-light);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-left: 4px;
-}
-
-.nav-tabs {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-lg);
-  height: 100%;
-}
-
-.nav-tab {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--color-text-secondary);
-  padding: 0 var(--spacing-sm);
-  height: 100%;
-  display: flex;
-  align-items: center;
-  position: relative;
-  transition: color var(--transition-fast);
-}
-
-.nav-tab:hover {
-  color: var(--color-text-primary);
-}
-
-.nav-tab.active {
-  color: #34d399;
-}
-
-.nav-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background-color: #34d399;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xl);
-}
-
-.profile-section {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  padding: 4px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--color-border);
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.profile-section:hover {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-.avatar {
-  width: 28px;
-  height: 28px;
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-  color: white;
-  font-weight: 700;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-}
-
-.profile-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  line-height: 1.2;
-}
-
-.profile-name {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--color-text-primary);
-}
-
-.profile-plan {
-  font-size: 0.7rem;
-  color: var(--color-text-secondary);
-}
-
-.chevron-icon {
-  color: var(--color-text-secondary);
-  font-size: 0.85rem;
-}
-
-/* App body layout below header */
-.app-body {
+.app__body {
   flex: 1;
+  min-height: 0;
   display: flex;
-  overflow: hidden;
-  height: calc(100vh - 64px);
 }
 
-/* Page containers */
-.page-container {
+.app__page {
   flex: 1;
+  min-width: 0;
+  min-height: 0;
   display: flex;
-  overflow: hidden;
-  height: 100%;
 }
 
-/* Home / Extraction Page Layout */
-.extract-grid {
+/* Pages that are a single column of content (Library, Settings) scroll as a
+   whole and are width-capped so lines don't run the width of a wide window. */
+.app__scroll {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: var(--spacing-lg);
-  padding: var(--spacing-lg);
-  overflow: hidden;
-  height: 100%;
-}
-
-.left-panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
+  min-height: 0;
   overflow-y: auto;
-  height: 100%;
-  padding-right: 4px;
+  padding: var(--space-6);
 }
 
-.right-panel {
-  width: 320px;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-  background-color: var(--color-bg-secondary);
-  border-left: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
-  overflow-y: auto;
-  height: 100%;
-}
-
-/* Shared page styling */
-.page-content-scroll {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--spacing-xl);
-  height: 100%;
+.app__scroll > * {
+  max-width: 860px;
+  margin: 0 auto;
 }

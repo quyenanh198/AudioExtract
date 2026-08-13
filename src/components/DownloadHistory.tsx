@@ -1,126 +1,157 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useDownloadStore } from '../store/downloadStore';
 import { invoke } from '@tauri-apps/api/core';
-import { FiFolder, FiPlay, FiTrash2, FiSearch } from 'react-icons/fi';
+import { FiFolder, FiInbox, FiSearch, FiTrash2 } from 'react-icons/fi';
+import {
+  Badge,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  EmptyState,
+  Input,
+} from './ui';
+import { useDownloadStore } from '../store/downloadStore';
+import { formatFileSize } from '../utils/formatUtils';
 import './DownloadHistory.css';
 
 export const DownloadHistory: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { history, removeFromHistory, clearHistory } = useDownloadStore();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [query, setQuery] = useState('');
+  const [confirmingClear, setConfirmingClear] = useState(false);
 
-  const formatBytes = (bytes: number, decimals = 2) => {
-    if (!+bytes) return '0 Bytes';
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
-  };
+  const filtered = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return history;
+    return history.filter((item) => item.title.toLowerCase().includes(needle));
+  }, [history, query]);
 
-  const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString(undefined, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
+  const formatDate = (timestamp: number) =>
+    new Intl.DateTimeFormat(i18n?.language, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    }).format(new Date(timestamp));
 
-  const filteredHistory = history.filter(item => 
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const handleOpenFile = async (path: string) => {
-    try {
-      // Platform specific open file can be added here
-      console.log('Open file:', path);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleOpenFolder = async (path: string) => {
+  const openFolder = async (path: string) => {
     try {
       await invoke('open_file_in_explorer', { path });
-    } catch (e) {
-      console.error('Failed to open folder:', e);
+    } catch (error) {
+      console.error('Could not open folder:', error);
     }
   };
 
   return (
-    <div className="history-container glass-panel">
-      <div className="history-header">
-        <h3>{t('history.title', 'Download History')}</h3>
-        <div className="history-actions">
-          <div className="search-bar">
-            <FiSearch />
-            <input 
-              type="text" 
-              placeholder={t('common.search', 'Search...')} 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="input-field"
-            />
-          </div>
-          {history.length > 0 && (
-            <button 
-              className="btn-danger" 
-              onClick={() => {
-                if(window.confirm(t('history.clearConfirm', 'Are you sure you want to clear all history?'))) {
-                  clearHistory();
-                }
-              }}
-            >
-              {t('history.clear', 'Clear All')}
-            </button>
-          )}
-        </div>
-      </div>
+    <Card className="history">
+      <CardHeader
+        title={t('history.title', 'Library')}
+        actions={
+          history.length > 0 && (
+            <div className="history__actions">
+              <div className="history__search">
+                <FiSearch aria-hidden />
+                <Input
+                  type="search"
+                  value={query}
+                  aria-label={t('common.search', 'Search')}
+                  placeholder={t('common.search', 'Search')}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+              </div>
 
-      <div className="history-list">
-        <AnimatePresence>
-          {filteredHistory.length === 0 ? (
-            <motion.div className="empty-state" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-              <p>{t('history.empty', 'No history found.')}</p>
-            </motion.div>
-          ) : (
-            filteredHistory.map(item => (
-              <motion.div 
-                key={item.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="history-item card"
-              >
-                <div className="history-item-info">
-                  <h4>{item.title}</h4>
-                  <div className="history-meta">
-                    <span className="badge">{formatBytes(item.fileSize)}</span>
+              {/* Inline confirm rather than window.confirm(): a native modal
+                  in a Tauri webview blocks the whole window and can't be
+                  styled or reliably dismissed with Escape across platforms. */}
+              {confirmingClear ? (
+                <div className="history__confirm">
+                  <span>{t('history.clearConfirm', 'Clear everything?')}</span>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      clearHistory();
+                      setConfirmingClear(false);
+                    }}
+                  >
+                    {t('common.confirm', 'Clear')}
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setConfirmingClear(false)}>
+                    {t('common.cancel', 'Cancel')}
+                  </Button>
+                </div>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={() => setConfirmingClear(true)}>
+                  <FiTrash2 />
+                  {t('history.clear', 'Clear all')}
+                </Button>
+              )}
+            </div>
+          )
+        }
+      />
+
+      <CardBody tight>
+        {filtered.length === 0 ? (
+          <EmptyState
+            icon={<FiInbox />}
+            title={
+              history.length === 0
+                ? t('history.empty', 'Nothing here yet')
+                : t('history.noMatches', 'No matches')
+            }
+            description={
+              history.length === 0
+                ? t('history.emptyHint', 'Files you extract will be listed here.')
+                : t('history.noMatchesHint', 'Try a different search term.')
+            }
+          />
+        ) : (
+          <ul className="history__list">
+            {filtered.map((item) => (
+              <li className="history-item" key={item.id}>
+                <div className="history-item__text">
+                  <p className="history-item__title truncate selectable" title={item.title}>
+                    {item.title}
+                  </p>
+                  <div className="history-item__meta">
+                    <Badge tone={item.mode === 'video' ? 'neutral' : 'accent'}>
+                      {item.mode === 'video'
+                        ? t('mode.video', 'Video')
+                        : t('mode.audio', 'Audio')}
+                    </Badge>
+                    {item.fileSize > 0 && <span>{formatFileSize(item.fileSize)}</span>}
                     <span>{formatDate(item.completedAt)}</span>
                   </div>
                 </div>
-                
-                <div className="history-item-actions">
-                  <button className="btn-secondary" onClick={() => handleOpenFile(item.outputPath)} title={t('history.openFile', 'Open File')}>
-                    <FiPlay />
-                  </button>
-                  <button className="btn-secondary" onClick={() => handleOpenFolder(item.outputPath)} title={t('history.openFolder', 'Open Folder')}>
+
+                <div className="history-item__actions">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    iconOnly
+                    onClick={() => openFolder(item.outputPath)}
+                    aria-label={t('history.openFolder', 'Open folder')}
+                    title={t('history.openFolder', 'Open folder')}
+                  >
                     <FiFolder />
-                  </button>
-                  <button className="btn-ghost text-danger" onClick={() => removeFromHistory(item.id)} title={t('history.delete', 'Delete')}>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    iconOnly
+                    className="history-item__delete"
+                    onClick={() => removeFromHistory(item.id)}
+                    aria-label={t('history.delete', 'Remove from library')}
+                    title={t('history.delete', 'Remove from library')}
+                  >
                     <FiTrash2 />
-                  </button>
+                  </Button>
                 </div>
-              </motion.div>
-            ))
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </CardBody>
+    </Card>
   );
 };

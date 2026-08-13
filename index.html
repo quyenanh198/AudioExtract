@@ -1,10 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tauri + React + Typescript</title>
+    <title>AudioExtract</title>
+    <!-- Painted before React mounts so the window doesn't flash white on
+         launch while the bundle evaluates. Kept in sync with --canvas. -->
+    <style>
+      html { background: #0b0f14; }
+      html[data-theme='light'] { background: #f1f4f8; }
+    </style>
   </head>
 
   <body>

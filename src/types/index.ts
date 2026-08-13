@@ -2,6 +2,7 @@ export interface DownloadTask {
   id: string;
   url: string;
   title?: string;
+  mode?: 'audio' | 'video';
   status: 'queued' | 'downloading' | 'processing' | 'completed' | 'failed' | 'cancelled';
   progress?: DownloadProgress;
   outputPath?: string;
@@ -20,6 +21,7 @@ export interface DownloadHistoryItem {
   id: string;
   title: string;
   url: string;
+  mode?: 'audio' | 'video';
   outputPath: string;
   fileSize: number;
   completedAt: number;
@@ -48,8 +50,9 @@ export interface VideoInfo {
 export interface DownloadAudioParams {
   taskId: string;
   url: string;
-  format: string;
-  quality: string;
+  mode?: 'audio' | 'video';
+  format?: string;
+  quality?: string;
   outputDir: string;
 }
 

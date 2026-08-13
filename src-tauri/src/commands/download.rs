@@ -48,24 +48,29 @@ pub async fn download_audio(
     state: tauri::State<'_, AppState>,
     task_id: String,
     url: String,
-    format: String,
-    quality: String,
+    format: Option<String>,
+    quality: Option<String>,
     output_dir: String,
 ) -> Result<(), String> {
     let ffmpeg_path = get_ffmpeg_path(&app)?;
 
-    let mut args = vec![
-        "--newline".to_string(),
-        "--extract-audio".to_string(),
-        "--audio-format".to_string(),
-        format,
-        "--audio-quality".to_string(),
-        quality,
-        "--ffmpeg-location".to_string(),
-        ffmpeg_path,
-        "-o".to_string(),
-        format!("{}/%(title)s.%(ext)s", output_dir),
-    ];
+    let mut args = vec!["--newline".to_string()];
+
+    match (format, quality) {
+        (Some(format), Some(quality)) => {
+            args.push("--extract-audio".to_string());
+            args.push("--audio-format".to_string());
+            args.push(format);
+            args.push("--audio-quality".to_string());
+            args.push(quality);
+        }
+        _ => {}
+    }
+
+    args.push("--ffmpeg-location".to_string());
+    args.push(ffmpeg_path);
+    args.push("-o".to_string());
+    args.push(format!("{}/%(title)s.%(ext)s", output_dir));
 
     args.push(url.clone());
 

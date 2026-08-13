@@ -1,66 +1,129 @@
 {
   "header": {
-    "title": "AudioExtract",
-    "subtitle": "Extract high-quality audio from videos"
+    "title": "AudioExtract"
   },
-  "urlInput": {
-    "placeholder": "Paste video URL here...",
-    "paste": "Paste",
-    "invalid": "Invalid URL",
-    "fetching": "Fetching info..."
+  "nav": {
+    "label": "Main",
+    "home": "Extract",
+    "history": "Library",
+    "settings": "Settings",
+    "activeJobs": "{{count}} active jobs"
   },
-  "videoInfo": {
-    "duration": "Duration",
-    "uploader": "Uploader",
-    "platform": "Platform"
+  "theme": {
+    "dark": "Dark",
+    "light": "Light",
+    "system": "System",
+    "toDark": "Switch to dark theme",
+    "toLight": "Switch to light theme"
+  },
+  "source": {
+    "title": "Add a video or audio source",
+    "subtitle": "Paste a YouTube, Facebook or TikTok link — or pick a file already on this computer.",
+    "urlLabel": "Video link",
+    "placeholder": "Paste a video link…",
+    "paste": "Paste from clipboard",
+    "fetch": "Fetch",
+    "fetching": "Fetching…",
+    "browse": "Choose a file…",
+    "formats": "MP4, MOV, MKV, WEBM, MP3, WAV, M4A, FLAC, Opus",
+    "invalidUrl": "That does not look like a video link.",
+    "fetchFailed": "Could not read that link. {{error}}",
+    "sourceTitle": "Source",
+    "playlistTitle": "Playlist",
+    "itemCount": "{{count}} items",
+    "clear": "Remove source"
+  },
+  "options": {
+    "title": "Output options",
+    "mode": "Mode",
+    "losslessNote": "Lossless format — bitrate is fixed by the source.",
+    "length": "Length",
+    "estimatedSize": "Est. size"
   },
   "formatPicker": {
-    "title": "Output Format",
-    "quality": "Quality",
-    "format": "Format"
+    "format": "Format",
+    "quality": "Quality"
+  },
+  "quality": {
+    "best": "Best — 320 kbps",
+    "high": "High — 192 kbps",
+    "standard": "Standard — 128 kbps",
+    "low": "Low — 64 kbps"
+  },
+  "mode": {
+    "audio": "Audio",
+    "video": "Video"
+  },
+  "extract": {
+    "audioButton": "Extract Audio",
+    "videoButton": "Download Video"
   },
   "trimmer": {
-    "title": "Trim Audio",
+    "title": "Trim",
+    "enable": "Trim range",
     "start": "Start",
     "end": "End",
-    "useFullTrack": "Use full track",
-    "preview": "Preview"
+    "sourceLength": "Source length",
+    "invalid": "Use mm:ss",
+    "rangeError": "End time must come after start time.",
+    "localOnly": "Trimming applies to local files. Downloads are saved in full."
   },
   "download": {
-    "start": "Download",
-    "cancel": "Cancel",
-    "progress": "Progress",
-    "speed": "Speed",
-    "eta": "ETA",
+    "queued": "Queued",
+    "downloading": "Downloading",
+    "converting": "Converting",
     "completed": "Completed",
-    "error": "Error",
-    "queue": "Queued"
+    "completedMessage": "Saved to your output folder.",
+    "cancelled": "Cancelled",
+    "cancelledMessage": "Cancelled.",
+    "error": "Failed",
+    "eta": "ETA"
+  },
+  "player": {
+    "title": "Preview",
+    "play": "Play",
+    "pause": "Pause",
+    "seek": "Seek",
+    "volume": "Volume",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "loop": "Loop",
+    "speed": "Playback speed"
   },
   "history": {
-    "title": "Download History",
-    "empty": "No history yet",
-    "openFile": "Open File",
-    "openFolder": "Open Folder",
-    "delete": "Delete",
-    "clear": "Clear All"
+    "title": "Library",
+    "empty": "Nothing here yet",
+    "emptyHint": "Files you extract will be listed here.",
+    "noMatches": "No matches",
+    "noMatchesHint": "Try a different search term.",
+    "openFolder": "Open folder",
+    "delete": "Remove from library",
+    "clear": "Clear all",
+    "clearConfirm": "Clear everything?"
   },
   "settings": {
     "title": "Settings",
-    "outputDir": "Output Directory",
-    "defaultFormat": "Default Format",
-    "defaultQuality": "Default Quality",
+    "outputDir": "Output folder",
+    "outputDirHint": "Where finished files are saved.",
+    "defaultFormat": "Default format",
+    "defaultQuality": "Default quality",
     "theme": "Theme",
     "language": "Language",
-    "autoUpdate": "Auto Update",
-    "concurrent": "Concurrent Downloads",
-    "browse": "Browse"
+    "autoUpdate": "Auto-update yt-dlp",
+    "autoUpdateHint": "Keeps downloads working when sites change.",
+    "concurrent": "Concurrent downloads",
+    "concurrentHint": "How many playlist items run at once.",
+    "browse": "Browse",
+    "unsaved": "Unsaved changes"
   },
   "common": {
-    "loading": "Loading...",
-    "error": "Error",
-    "success": "Success",
+    "or": "or",
+    "loading": "Loading…",
+    "search": "Search",
     "cancel": "Cancel",
-    "save": "Save",
+    "confirm": "Clear",
+    "save": "Save changes",
+    "saved": "Saved",
     "close": "Close"
   }
 }
