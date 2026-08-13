@@ -1,6 +1,7 @@
 use serde::Serialize;
 use tauri::{AppHandle, Emitter};
 use tauri_plugin_shell::ShellExt;
+use crate::utils::process_events::{drain_command_events, CommandLine};
 
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
@@ -41,39 +42,25 @@ pub async fn update_ytdlp(app: AppHandle) -> Result<(), String> {
         .map_err(|e| e.to_string())?
         .args(["--update"]);
 
-    let (mut rx, _child) = cmd.spawn().map_err(|e| e.to_string())?;
+    let (rx, _child) = cmd.spawn().map_err(|e| e.to_string())?;
 
     let app_clone = app.clone();
 
     tauri::async_runtime::spawn(async move {
         let mut final_msg = String::new();
-        let mut success = true;
 
-        while let Some(event) = rx.recv().await {
-            match event {
-                tauri_plugin_shell::process::CommandEvent::Stdout(line_bytes) => {
-                    let line = String::from_utf8_lossy(&line_bytes).to_string();
-                    final_msg.push_str(&line);
-                    final_msg.push('\n');
-                    let _ = app_clone.emit("ytdlp-update-progress", UpdateProgress {
-                        message: line,
-                    });
-                }
-                tauri_plugin_shell::process::CommandEvent::Stderr(line_bytes) => {
-                    let line = String::from_utf8_lossy(&line_bytes).to_string();
-                    final_msg.push_str(&line);
-                    final_msg.push('\n');
-                    let _ = app_clone.emit("ytdlp-update-progress", UpdateProgress {
-                        message: line,
-                    });
-                }
-                tauri_plugin_shell::process::CommandEvent::Terminated(payload) => {
-                    success = payload.code == Some(0);
-                    break;
-                }
-                _ => {}
-            }
-        }
+        let exit_code = drain_command_events(rx, |line| {
+            let text = match line {
+                CommandLine::Stdout(l) | CommandLine::Stderr(l) => l,
+            };
+            final_msg.push_str(&text);
+            final_msg.push('\n');
+            let _ = app_clone.emit("ytdlp-update-progress", UpdateProgress {
+                message: text,
+            });
+        })
+        .await;
+        let success = exit_code == Some(0);
 
         let _ = app_clone.emit("ytdlp-update-finished", UpdateFinished {
             success,

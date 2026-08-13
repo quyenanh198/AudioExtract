@@ -8,6 +8,7 @@ use uuid::Uuid;
 
 use crate::utils::progress_parser::{parse_progress_line, DownloadProgress};
 use crate::utils::path_resolver::get_ffmpeg_path;
+use crate::utils::process_events::{drain_command_events, CommandLine};
 
 #[derive(Default)]
 pub struct AppState {
@@ -74,7 +75,7 @@ pub async fn download_audio(
         .command(yt_dlp_path)
         .args(args);
 
-    let (mut rx, child) = cmd.spawn().map_err(|e| e.to_string())?;
+    let (rx, child) = cmd.spawn().map_err(|e| e.to_string())?;
 
     {
         let mut downloads = state.downloads.lock().await;
@@ -87,43 +88,34 @@ pub async fn download_audio(
 
     tauri::async_runtime::spawn(async move {
         let mut final_output_path = None;
-        let mut has_error = false;
         let mut error_msg = String::new();
 
-        while let Some(event) = rx.recv().await {
-            match event {
-                tauri_plugin_shell::process::CommandEvent::Stdout(line_bytes) => {
-                    let line = String::from_utf8_lossy(&line_bytes).to_string();
-                    
-                    if let Some(prog) = parse_progress_line(&line) {
-                        let _ = app_clone.emit("download-progress", DownloadProgressEvent {
-                            task_id: task_id_clone.clone(),
-                            progress: prog,
-                        });
-                    }
-                    
-                    if line.contains("[ExtractAudio] Destination: ") {
-                        let path = line.split("[ExtractAudio] Destination: ").nth(1).unwrap_or("").trim().to_string();
-                        if !path.is_empty() { final_output_path = Some(path); }
-                    } else if line.contains("[download] Destination: ") {
-                        let path = line.split("[download] Destination: ").nth(1).unwrap_or("").trim().to_string();
-                        if !path.is_empty() { final_output_path = Some(path); }
-                    }
+        let exit_code = drain_command_events(rx, |line| match line {
+            CommandLine::Stdout(line) => {
+                if let Some(prog) = parse_progress_line(&line) {
+                    let _ = app_clone.emit("download-progress", DownloadProgressEvent {
+                        task_id: task_id_clone.clone(),
+                        progress: prog,
+                    });
                 }
-                tauri_plugin_shell::process::CommandEvent::Stderr(line_bytes) => {
-                    let line = String::from_utf8_lossy(&line_bytes).to_string();
-                    if line.to_lowercase().contains("error") {
-                        error_msg.push_str(&line);
-                        error_msg.push('\n');
-                    }
+
+                if line.contains("[ExtractAudio] Destination: ") {
+                    let path = line.split("[ExtractAudio] Destination: ").nth(1).unwrap_or("").trim().to_string();
+                    if !path.is_empty() { final_output_path = Some(path); }
+                } else if line.contains("[download] Destination: ") {
+                    let path = line.split("[download] Destination: ").nth(1).unwrap_or("").trim().to_string();
+                    if !path.is_empty() { final_output_path = Some(path); }
                 }
-                tauri_plugin_shell::process::CommandEvent::Terminated(payload) => {
-                    has_error = payload.code != Some(0);
-                    break;
-                }
-                _ => {}
             }
-        }
+            CommandLine::Stderr(line) => {
+                if line.to_lowercase().contains("error") {
+                    error_msg.push_str(&line);
+                    error_msg.push('\n');
+                }
+            }
+        })
+        .await;
+        let has_error = exit_code != Some(0);
 
         {
             let mut downloads = downloads_arc.lock().await;

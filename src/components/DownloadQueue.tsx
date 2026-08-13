@@ -2,17 +2,34 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDownloadStore } from '../store/downloadStore';
+import { useDownload } from '../hooks/useDownload';
 import { DownloadProgress } from './DownloadProgress';
 import { FiInbox } from 'react-icons/fi';
 import './DownloadQueue.css';
 
 export const DownloadQueue: React.FC = () => {
   const { t } = useTranslation();
-  const { tasks, removeTask } = useDownloadStore();
+  const { tasks, cancelTask } = useDownloadStore();
+  const { cancelDownload } = useDownload();
 
   const activeAndQueuedTasks = Object.values(tasks).filter(
     task => ['queued', 'downloading', 'processing'].includes(task.status)
   );
+
+  const handleCancel = async (id: string) => {
+    // Update local state first so the UI reflects the cancellation
+    // immediately, then kill the actual backend process. Order matters:
+    // if the kill's completion event arrives before this, the store guards
+    // in completeTask/failTask already protect a 'cancelled' task from
+    // being overwritten, so doing this first vs. after doesn't change
+    // correctness — but doing it first gives instant UI feedback.
+    cancelTask(id);
+    try {
+      await cancelDownload(id);
+    } catch (err) {
+      console.error('Failed to cancel download on backend', err);
+    }
+  };
 
   return (
     <div className="download-queue-container">
@@ -41,9 +58,9 @@ export const DownloadQueue: React.FC = () => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.2 }}
               >
-                <DownloadProgress 
-                  task={task} 
-                  onCancel={(id) => removeTask(id)} 
+                <DownloadProgress
+                  task={task}
+                  onCancel={handleCancel}
                 />
               </motion.div>
             ))

@@ -34,7 +34,9 @@ export const useDownloadStore = create<DownloadStore>()(
       })),
       completeTask: (taskId, outputPath, fileSize) => set((state) => {
         const task = state.tasks.find(t => t.id === taskId);
-        if (task) {
+        // A task the user already cancelled locally shouldn't be resurrected as
+        // completed by a late backend event racing the kill.
+        if (task && task.status !== 'cancelled') {
           const historyItem: DownloadHistoryItem = {
             id: task.id,
             title: task.title || 'Unknown Title',
@@ -51,7 +53,10 @@ export const useDownloadStore = create<DownloadStore>()(
         return state;
       }),
       failTask: (taskId, error) => set((state) => ({
-        tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: 'failed', error } : t)
+        // Same race as above: a cancelled task's process still emits a
+        // failure event once killed (non-zero exit code) — don't let that
+        // overwrite the "cancelled" status with "failed".
+        tasks: state.tasks.map(t => t.id === taskId && t.status !== 'cancelled' ? { ...t, status: 'failed', error } : t)
       })),
       cancelTask: (taskId) => set((state) => ({
         tasks: state.tasks.map(t => t.id === taskId ? { ...t, status: 'cancelled' } : t)

@@ -22,16 +22,6 @@
         }
       ]
     },
-    {
-      "identifier": "shell:allow-execute",
-      "allow": [
-        {
-          "name": "*",
-          "cmd": "*",
-          "args": true
-        }
-      ]
-    },
     "dialog:default",
     "dialog:allow-open",
     "dialog:allow-save",
