@@ -43,6 +43,7 @@ export const DownloadProgress: React.FC<DownloadProgressProps> = ({ task, onCanc
           <div className="platform-icon-small">
             {getPlatformIcon(task.url)}
           </div>
+          <span className="mode-badge">{task.mode === 'video' ? t('mode.video', 'Video') : t('mode.audio', 'Audio')}</span>
           <h4 className="task-title" title={task.title || task.url}>
             {task.title || task.url}
           </h4>

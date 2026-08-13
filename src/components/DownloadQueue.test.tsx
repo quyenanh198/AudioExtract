@@ -26,6 +26,7 @@ describe('DownloadQueue cancel button', () => {
         {
           id: 'task-1',
           url: 'https://youtube.com/watch?v=abc',
+          mode: 'audio',
           status: 'downloading',
           createdAt: Date.now(),
         },
