@@ -1,15 +1,16 @@
 import { invoke } from '@tauri-apps/api/core';
-import { VideoInfo, DownloadAudioParams, TrimAudioParams } from '../types';
+import { VideoInfo, DownloadMediaParams, TrimAudioParams } from '../types';
 
 export const useDownload = () => {
   const fetchVideoInfo = async (url: string): Promise<VideoInfo[]> => {
     return invoke('fetch_video_info', { url });
   };
 
-  const startDownload = async (params: DownloadAudioParams): Promise<void> => {
-    return invoke('download_audio', {
+  const startDownload = async (params: DownloadMediaParams): Promise<void> => {
+    return invoke('download_media', {
       taskId: params.taskId,
       url: params.url,
+      mode: params.mode,
       format: params.format,
       quality: params.quality,
       outputDir: params.outputDir
