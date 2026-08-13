@@ -81,38 +81,28 @@ pub fn build_video_args(ffmpeg_path: &str, output_dir: &str, url: &str) -> Vec<S
 }
 
 #[tauri::command]
-pub async fn download_audio(
+pub async fn download_media(
     app: AppHandle,
     state: tauri::State<'_, AppState>,
     task_id: String,
     url: String,
-    format: String,
-    quality: String,
+    mode: String,
+    format: Option<String>,
+    quality: Option<String>,
     output_dir: String,
 ) -> Result<(), String> {
     let ffmpeg_path = get_ffmpeg_path(&app)?;
-
-    let mut args = vec![
-        "--newline".to_string(),
-        "--extract-audio".to_string(),
-        "--audio-format".to_string(),
-        format,
-        "--audio-quality".to_string(),
-        quality,
-        "--ffmpeg-location".to_string(),
-        ffmpeg_path,
-        "-o".to_string(),
-        format!("{}/%(title)s.%(ext)s", output_dir),
-    ];
-
-    args.push(url.clone());
-
     let yt_dlp_path = crate::utils::path_resolver::resolve_binary_path("yt-dlp")?;
-    let cmd = app
-        .shell()
-        .command(yt_dlp_path)
-        .args(args);
 
+    let args = if mode == "video" {
+        build_video_args(&ffmpeg_path, &output_dir, &url)
+    } else {
+        let format = format.ok_or("format is required for audio mode")?;
+        let quality = quality.ok_or("quality is required for audio mode")?;
+        build_audio_args(&format, &quality, &ffmpeg_path, &output_dir, &url)
+    };
+
+    let cmd = app.shell().command(yt_dlp_path).args(args);
     let (rx, child) = cmd.spawn().map_err(|e| e.to_string())?;
 
     {

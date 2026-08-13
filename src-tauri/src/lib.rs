@@ -12,7 +12,7 @@ pub fn run() {
         .manage(commands::download::AppState::default())
         .invoke_handler(tauri::generate_handler![
             commands::fetch_info::fetch_video_info,
-            commands::download::download_audio,
+            commands::download::download_media,
             commands::download::cancel_download,
             commands::trim::trim_audio,
             commands::update::check_ytdlp_update,
