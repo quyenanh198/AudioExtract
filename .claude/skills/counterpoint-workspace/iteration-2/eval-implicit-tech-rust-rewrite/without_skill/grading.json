@@ -1,0 +1,38 @@
+{
+  "expectations": [
+    {
+      "text": "Output steelmans the reasoning for considering Rust before critiquing",
+      "passed": false,
+      "evidence": "Opens directly with caution ('mình nghĩ nên cân nhắc kỹ vài điểm sau, vì đây là một quyết định rủi ro cao') rather than first validating why Rust is a reasonable thing to consider."
+    },
+    {
+      "text": "Output flags the lack of profiling/evidence that language choice is actually the bottleneck",
+      "passed": true,
+      "evidence": "Section 1 lists many non-language causes of 800ms p95 and says to profile with APM/flame graph first."
+    },
+    {
+      "text": "Output flags the team's lack of Rust production experience as a risk",
+      "passed": true,
+      "evidence": "Section 2 explicitly discusses months-long learning curve and cites 'Things You Should Never Do' on big-bang rewrites."
+    },
+    {
+      "text": "Output proposes a concrete alternative (e.g. profile first, incremental/partial rewrite) instead of a binary yes/no",
+      "passed": true,
+      "evidence": "Section 3: optimize Node first, or extract only the CPU-bound audio-processing part into a Rust microservice via NAPI-RS/gRPC."
+    },
+    {
+      "text": "Output does not simply endorse a full rewrite without qualification",
+      "passed": true,
+      "evidence": "Clearly frames rewrite as high-risk and recommends profiling + incremental approach instead."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 1,
+    "total": 5,
+    "pass_rate": 0.8
+  },
+  "timing": {
+    "total_duration_seconds": 37.1
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "expectations": [
+    {
+      "text": "Output steelmans the reasoning for considering Rust before critiquing",
+      "passed": true,
+      "evidence": "'hướng suy nghĩ này không vô lý' after acknowledging the real p95 problem and Rust's theoretical advantages."
+    },
+    {
+      "text": "Output flags the lack of profiling/evidence that language choice is actually the bottleneck",
+      "passed": true,
+      "evidence": "'Đã có số liệu profiling nào cho thấy CPU/event-loop của Node thực sự là nút thắt, hay mới chỉ suy đoán...?'"
+    },
+    {
+      "text": "Output flags the team's lack of Rust production experience as a risk",
+      "passed": true,
+      "evidence": "Discusses borrow checker/lifetime/tokio learning curve and productivity risk while maintaining production."
+    },
+    {
+      "text": "Output proposes a concrete alternative (e.g. profile first, incremental/partial rewrite) instead of a binary yes/no",
+      "passed": true,
+      "evidence": "Profile first, then strangler-pattern extraction of only the CPU-bound part if needed."
+    },
+    {
+      "text": "Output does not simply endorse a full rewrite without qualification",
+      "passed": true,
+      "evidence": "Frames full rewrite as premature."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 49.5
+  }
+}

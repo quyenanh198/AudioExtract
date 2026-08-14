@@ -1,0 +1,28 @@
+{
+  "expectations": [
+    {
+      "text": "Output does not force an artificial steelman/critique structure onto what is fundamentally a recommendation request",
+      "passed": true,
+      "evidence": "Opens with 'Trả lời thẳng: ... cứ thử 5x trước, đừng nhảy thẳng lên 20x' — a direct recommendation, no steelman/counterpoint/risk-if-wrong ceremony."
+    },
+    {
+      "text": "Output addresses the actual question (5x vs 20x plan choice, and whether current usage would max out those limits) rather than producing an unrelated critique",
+      "passed": true,
+      "evidence": "Directly compares 5x vs 20x, explains the mechanism, and gives a concrete self-check method (when Pro limit gets hit during the week)."
+    },
+    {
+      "text": "Output either answers helpfully or asks a clarifying question about missing info instead of fabricating a critique-shaped response",
+      "passed": true,
+      "evidence": "Gives a working default recommendation (try 5x, monitor, upgrade if still maxing out) plus a genuinely useful caveat (Opus vs Sonnet quota) — not critique-shaped."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 47.8
+  }
+}
