@@ -1,0 +1,10 @@
+{
+  "eval_id": 7,
+  "eval_name": "boundary-claude-plan-upgrade",
+  "prompt": "Tôi đang xài Claude pro với giá 20$. Weekly limit là không đủ đối với tôi. Nếu phải upgrade thì tôi nên chọn gói 5x hay 20x. Liệu nhu cầu hiện tại của tôi có fill up/max out limit của những gói này không?",
+  "assertions": [
+    "Output does not force an artificial steelman/critique structure onto what is fundamentally a recommendation request",
+    "Output addresses the actual question (5x vs 20x plan choice, and whether current usage would max out those limits) rather than producing an unrelated critique",
+    "Output either answers helpfully or asks a clarifying question about missing info instead of fabricating a critique-shaped response"
+  ]
+}

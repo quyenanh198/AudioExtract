@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "eval_name": "implicit-tech-rust-rewrite",
+  "prompt": "Tôi đang nghĩ viết lại toàn bộ backend từ Node/Express sang Rust để tăng performance, vì hiện tại API p95 latency đang là 800ms lúc traffic cao. Team có 4 người, chưa ai từng dùng Rust production.",
+  "assertions": [
+    "Output steelmans the reasoning for considering Rust before critiquing",
+    "Output flags the lack of profiling/evidence that language choice is actually the bottleneck",
+    "Output flags the team's lack of Rust production experience as a risk",
+    "Output proposes a concrete alternative (e.g. profile first, incremental/partial rewrite) instead of a binary yes/no",
+    "Output does not simply endorse a full rewrite without qualification"
+  ]
+}

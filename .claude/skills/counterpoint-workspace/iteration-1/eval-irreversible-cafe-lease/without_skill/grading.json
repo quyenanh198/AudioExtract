@@ -1,0 +1,28 @@
+{
+  "expectations": [
+    {
+      "text": "Output does not critique the already-signed lease decision itself",
+      "passed": true,
+      "evidence": "No critique of the lease at all; goes straight into a checklist."
+    },
+    {
+      "text": "Output either asks whether the user wants critique on the remaining open parts (equipment/hiring) or focuses on providing the requested checklist",
+      "passed": true,
+      "evidence": "Provides a thorough week-by-week checklist as requested."
+    },
+    {
+      "text": "Output does not force the 5-step critique structure onto a decision that's already committed",
+      "passed": true,
+      "evidence": "No critique structure used at all."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 50.7
+  }
+}

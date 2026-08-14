@@ -1,0 +1,43 @@
+{
+  "expectations": [
+    {
+      "text": "Output includes a steelman/positive framing of the free-tier removal plan before critiquing it",
+      "passed": true,
+      "evidence": "'Bỏ free tier để tập trung nguồn lực vào 2 gói trả phí là hướng đi hợp lý để cải thiện unit economics' stated before the list of considerations."
+    },
+    {
+      "text": "Output identifies at least one unverified assumption specific to this plan, not generic advice",
+      "passed": true,
+      "evidence": "Point 1 questions whether free user really doesn't convert vs. onboarding/value issues, asks for cohort data."
+    },
+    {
+      "text": "Output offers at least one concrete alternative approach, not just 'consider other options'",
+      "passed": true,
+      "evidence": "Point 3: 'siết giới hạn free (ít tính năng hơn...) để giảm tải support mà vẫn giữ kênh phễu'."
+    },
+    {
+      "text": "Output describes a concrete consequence/risk if the identified weakness turns out true",
+      "passed": false,
+      "evidence": "The 6 numbered points are framed as things to check/consider (indirect value, pricing gap, migration comms, metrics to track) but none spells out a concrete 'if X is wrong, then Y happens' consequence the way the with_skill version does."
+    },
+    {
+      "text": "Output ends with an open question or suggested next step for the user to verify",
+      "passed": true,
+      "evidence": "Closes asking for conversion rate, support traffic %, CAC/LTV data, and offers to help draft a migration plan."
+    },
+    {
+      "text": "Output does not simply agree with the plan without pushback",
+      "passed": true,
+      "evidence": "Six substantive considerations raised, not a simple endorsement."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 1,
+    "total": 6,
+    "pass_rate": 0.8333
+  },
+  "timing": {
+    "total_duration_seconds": 34.0
+  }
+}

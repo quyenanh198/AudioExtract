@@ -1,0 +1,28 @@
+{
+  "expectations": [
+    {
+      "text": "Output does not force an artificial steelman/critique structure onto what is fundamentally a recommendation request",
+      "passed": false,
+      "evidence": "Follows the skill's template almost exactly: opening validation ('Nghe hợp lý ở chỗ...'), 3 numbered unverified-assumption points, 'Góc nhìn khác', 'Rủi ro nếu bỏ qua', closing question — applied to a plan-recommendation question, not a stance to critique."
+    },
+    {
+      "text": "Output addresses the actual question (5x vs 20x plan choice, and whether current usage would max out those limits) rather than producing an unrelated critique",
+      "passed": true,
+      "evidence": "Content stays on-topic (usage pattern, model mix, monitoring, pay-as-you-go alternative) even though framed as critique."
+    },
+    {
+      "text": "Output either answers helpfully or asks a clarifying question about missing info instead of fabricating a critique-shaped response",
+      "passed": false,
+      "evidence": "Never gives a working recommendation or even a conditional one ('if X then 5x, if Y then 20x') the way the baseline does — ends by asking the user more questions instead of answering, wrapped throughout in critique framing ('rủi ro nếu bỏ qua bước kiểm tra này')."
+    }
+  ],
+  "summary": {
+    "passed": 1,
+    "failed": 2,
+    "total": 3,
+    "pass_rate": 0.3333
+  },
+  "timing": {
+    "total_duration_seconds": 78.0
+  }
+}

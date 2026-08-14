@@ -1,0 +1,33 @@
+{
+  "expectations": [
+    {
+      "text": "Output explicitly responds to the 'cho toi goc nhin khac' framing with a genuine alternative perspective, not just validation",
+      "passed": true,
+      "evidence": "Opens acknowledging the good prep, then pivots into three specific assumptions to re-examine — genuine pushback, not cheerleading."
+    },
+    {
+      "text": "Output flags runway (6 months) and early traction (12 users) as things to scrutinize",
+      "passed": true,
+      "evidence": "Directly interrogates both: personal vs. product runway, and 'quay lại lần hai / trả tiền / nguồn đến từ đâu' for the 12 users."
+    },
+    {
+      "text": "Output proposes a concrete alternative path or validation milestone before quitting",
+      "passed": true,
+      "evidence": "'đặt ra một cột mốc cụ thể... đạt X người dùng trả tiền hoặc Y% quay lại tuần thứ hai, làm song song ngoài giờ hoặc xin giảm giờ làm'."
+    },
+    {
+      "text": "Output includes an open question or next-step suggestion",
+      "passed": true,
+      "evidence": "Closes with three concrete self-check questions."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 44.5
+  }
+}

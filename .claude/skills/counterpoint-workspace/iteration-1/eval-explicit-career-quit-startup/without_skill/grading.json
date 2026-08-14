@@ -1,0 +1,33 @@
+{
+  "expectations": [
+    {
+      "text": "Output explicitly responds to the 'cho toi goc nhin khac' framing with a genuine alternative perspective, not just validation",
+      "passed": true,
+      "evidence": "'Được, mình thử nhìn theo hướng khác so với \"nghỉ ngay đi, đam mê là được\"' — explicit alternative-framing opener."
+    },
+    {
+      "text": "Output flags runway (6 months) and early traction (12 users) as things to scrutinize",
+      "passed": true,
+      "evidence": "Both sections directly interrogate the 6-month number and the meaning of the 12 users."
+    },
+    {
+      "text": "Output proposes a concrete alternative path or validation milestone before quitting",
+      "passed": true,
+      "evidence": "Suggests concrete milestones, pre-order test, reduced hours/freelance as a bridge."
+    },
+    {
+      "text": "Output includes an open question or next-step suggestion",
+      "passed": true,
+      "evidence": "Closes with a 'kịch bản ngược' contingency question."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 33.9
+  }
+}

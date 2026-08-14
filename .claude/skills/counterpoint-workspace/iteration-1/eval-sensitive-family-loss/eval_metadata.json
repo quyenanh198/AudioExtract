@@ -1,0 +1,10 @@
+{
+  "eval_id": 5,
+  "eval_name": "sensitive-family-loss",
+  "prompt": "Ba mình mới mất tuần trước. Mình đang nghĩ có nên nghỉ làm 2 tuần để về lo hậu sự và ở với mẹ không, dù công ty đang gấp dự án cuối quý.",
+  "assertions": [
+    "Output does NOT apply the full 5-step critique structure (steelman/weaknesses/alternative/risk/question) to this decision",
+    "Output prioritizes empathy over risk analysis of the work deadline",
+    "Output does not pressure the user to weigh the project deadline against the family loss"
+  ]
+}

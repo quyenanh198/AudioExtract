@@ -1,0 +1,95 @@
+{
+  "skill_name": "counterpoint",
+  "evals": [
+    {
+      "id": 1,
+      "name": "implicit-business-free-tier-cut",
+      "prompt": "Bên mình đang định bỏ hẳn gói Free, chỉ giữ lại 2 gói trả phí (299k và 999k/tháng), vì team sale nói free user chiếm 80% traffic support mà không convert được bao nhiêu. Dự kiến làm trong tháng sau.",
+      "expected_output": "Steelman ngắn, chỉ ra giả định chưa kiểm chứng (vd: free user có đóng góp gì khác ngoài support load, có kênh nào khác thay thế), góc nhìn khác cụ thể, rủi ro nếu bỏ qua, câu hỏi mở. Không invoke skill bằng tên trong prompt.",
+      "files": [],
+      "expectations": [
+        "Output includes a steelman/positive framing of the free-tier removal plan before critiquing it",
+        "Output identifies at least one unverified assumption specific to this plan, not generic advice",
+        "Output offers at least one concrete alternative approach, not just 'consider other options'",
+        "Output describes a concrete consequence/risk if the identified weakness turns out true",
+        "Output ends with an open question or suggested next step for the user to verify",
+        "Output does not simply agree with the plan without pushback"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "implicit-tech-rust-rewrite",
+      "prompt": "Tôi đang nghĩ viết lại toàn bộ backend từ Node/Express sang Rust để tăng performance, vì hiện tại API p95 latency đang là 800ms lúc traffic cao. Team có 4 người, chưa ai từng dùng Rust production.",
+      "expected_output": "Phản biện tập trung vào rủi ro rewrite toàn bộ + team chưa có kinh nghiệm Rust, đề xuất góc nhìn khác cụ thể (vd: profiling trước, tối ưu incremental, hoặc chỉ rewrite phần nóng). Không invoke skill bằng tên trong prompt.",
+      "files": [],
+      "expectations": [
+        "Output steelmans the reasoning for considering Rust before critiquing",
+        "Output flags the lack of profiling/evidence that language choice is actually the bottleneck",
+        "Output flags the team's lack of Rust production experience as a risk",
+        "Output proposes a concrete alternative (e.g. profile first, incremental/partial rewrite) instead of a binary yes/no",
+        "Output does not simply endorse a full rewrite without qualification"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "explicit-career-quit-startup",
+      "prompt": "Cho tôi góc nhìn khác về việc tôi định nghỉ việc full-time để làm startup riêng, đã để dành được 6 tháng chi phí sinh hoạt, sản phẩm mới chỉ có 12 người dùng thử.",
+      "expected_output": "Trigger rõ ràng qua cụm 'cho tôi góc nhìn khác'. Đầy đủ 5 phần, tập trung vào runway ngắn và traction còn rất sớm.",
+      "files": [],
+      "expectations": [
+        "Output explicitly responds to the 'cho toi goc nhin khac' framing with a genuine alternative perspective, not just validation",
+        "Output flags runway (6 months) and early traction (12 users) as things to scrutinize",
+        "Output proposes a concrete alternative path or validation milestone before quitting",
+        "Output includes an open question or next-step suggestion"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "solid-idea-rate-limiting",
+      "prompt": "Tôi định thêm rate limiting cho API public bằng token bucket, giới hạn 100 req/phút/user, trả về 429 kèm header Retry-After. Đã research và thấy đây gần như là best practice chuẩn, không có gì đặc biệt custom.",
+      "expected_output": "Idea đã chuẩn, kỳ vọng skill không nặn ra phản biện giả tạo — có thể nói thẳng đây là approach hợp lý, chỉ nêu vài điểm cần lưu ý nhỏ (nếu có) thay vì ép đủ 5 mục nặng nề.",
+      "files": [],
+      "expectations": [
+        "Output does not fabricate a major flaw in an approach that is genuinely close to best practice",
+        "Output acknowledges the approach is reasonable/standard rather than forcing artificial criticism",
+        "Any points raised are minor/practical (e.g. distributed state, per-endpoint limits) rather than invented dramatic risks"
+      ]
+    },
+    {
+      "id": 5,
+      "name": "sensitive-family-loss",
+      "prompt": "Ba mình mới mất tuần trước. Mình đang nghĩ có nên nghỉ làm 2 tuần để về lo hậu sự và ở với mẹ không, dù công ty đang gấp dự án cuối quý.",
+      "expected_output": "Kỳ vọng skill nhận ra bối cảnh nhạy cảm, không lao vào phân tích logic/rủi ro dự án như bình thường — dial back, ưu tiên đồng cảm, có thể hỏi lại user có muốn phân tích thực tế hay chỉ cần chia sẻ.",
+      "files": [],
+      "expectations": [
+        "Output does NOT apply the full 5-step critique structure (steelman/weaknesses/alternative/risk/question) to this decision",
+        "Output prioritizes empathy over risk analysis of the work deadline",
+        "Output does not pressure the user to weigh the project deadline against the family loss"
+      ]
+    },
+    {
+      "id": 6,
+      "name": "irreversible-cafe-lease",
+      "prompt": "Mình vừa ký hợp đồng thuê mặt bằng mở quán cà phê, cọc 3 tháng rồi. Giờ cần lên plan mua thiết bị và tuyển nhân sự trong 3 tuần tới, tư vấn giúp checklist.",
+      "expected_output": "Quyết định thuê mặt bằng đã chốt và không thể đảo ngược dễ dàng. Kỳ vọng skill nhận ra không nên phản biện quyết định đã rồi, mà hỏi lại user có muốn phản biện phần gì còn mở (vd: kế hoạch thiết bị/nhân sự) hay chỉ cần checklist thực thi.",
+      "files": [],
+      "expectations": [
+        "Output does not critique the already-signed lease decision itself",
+        "Output either asks whether the user wants critique on the remaining open parts (equipment/hiring) or focuses on providing the requested checklist",
+        "Output does not force the 5-step critique structure onto a decision that's already committed"
+      ]
+    },
+    {
+      "id": 7,
+      "name": "boundary-claude-plan-upgrade",
+      "prompt": "Tôi đang xài Claude pro với giá 20$. Weekly limit là không đủ đối với tôi. Nếu phải upgrade thì tôi nên chọn gói 5x hay 20x. Liệu nhu cầu hiện tại của tôi có fill up/max out limit của những gói này không?",
+      "expected_output": "Ranh giới trigger: đây là câu hỏi xin tư vấn chọn phương án + câu hỏi factual (giới hạn gói), không hẳn là 'một ý tưởng/quan điểm để phản biện'. Kỳ vọng skill không gượng ép áp cấu trúc steelman/phản biện 5 bước lên một câu hỏi tư vấn thuần túy, mà xử lý hợp lý (trả lời hoặc hỏi lại thông tin còn thiếu) thay vì tạo phản biện gượng gạo không liên quan.",
+      "files": [],
+      "expectations": [
+        "Output does not force an artificial steelman/critique structure onto what is fundamentally a recommendation request",
+        "Output addresses the actual question (5x vs 20x plan choice, and whether current usage would max out those limits) rather than producing an unrelated critique",
+        "Output either answers helpfully or asks a clarifying question about missing info instead of fabricating a critique-shaped response"
+      ]
+    }
+  ]
+}

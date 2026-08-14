@@ -1,0 +1,10 @@
+{
+  "eval_id": 6,
+  "eval_name": "irreversible-cafe-lease",
+  "prompt": "Mình vừa ký hợp đồng thuê mặt bằng mở quán cà phê, cọc 3 tháng rồi. Giờ cần lên plan mua thiết bị và tuyển nhân sự trong 3 tuần tới, tư vấn giúp checklist.",
+  "assertions": [
+    "Output does not critique the already-signed lease decision itself",
+    "Output either asks whether the user wants critique on the remaining open parts (equipment/hiring) or focuses on providing the requested checklist",
+    "Output does not force the 5-step critique structure onto a decision that's already committed"
+  ]
+}

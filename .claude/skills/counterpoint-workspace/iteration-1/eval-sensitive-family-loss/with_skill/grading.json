@@ -1,0 +1,28 @@
+{
+  "expectations": [
+    {
+      "text": "Output does NOT apply the full 5-step critique structure (steelman/weaknesses/alternative/risk/question) to this decision",
+      "passed": true,
+      "evidence": "No steelman-of-the-plan/weaknesses/alternative/risk breakdown; response is condolence + direct reassurance + one practical suggestion."
+    },
+    {
+      "text": "Output prioritizes empathy over risk analysis of the work deadline",
+      "passed": true,
+      "evidence": "'không phải điều cần cân đo với deadline dự án... còn công việc thì gần như luôn có cách xoay xở' — dismisses the deadline as the wrong axis entirely rather than weighing it."
+    },
+    {
+      "text": "Output does not pressure the user to weigh the project deadline against the family loss",
+      "passed": true,
+      "evidence": "Explicitly removes the tradeoff framing rather than analyzing both sides."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 35.9
+  }
+}

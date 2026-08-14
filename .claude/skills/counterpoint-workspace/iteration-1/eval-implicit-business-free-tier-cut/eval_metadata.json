@@ -1,0 +1,13 @@
+{
+  "eval_id": 1,
+  "eval_name": "implicit-business-free-tier-cut",
+  "prompt": "Bên mình đang định bỏ hẳn gói Free, chỉ giữ lại 2 gói trả phí (299k và 999k/tháng), vì team sale nói free user chiếm 80% traffic support mà không convert được bao nhiêu. Dự kiến làm trong tháng sau.",
+  "assertions": [
+    "Output includes a steelman/positive framing of the free-tier removal plan before critiquing it",
+    "Output identifies at least one unverified assumption specific to this plan, not generic advice",
+    "Output offers at least one concrete alternative approach, not just 'consider other options'",
+    "Output describes a concrete consequence/risk if the identified weakness turns out true",
+    "Output ends with an open question or suggested next step for the user to verify",
+    "Output does not simply agree with the plan without pushback"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "expectations": [
+    {
+      "text": "Output includes a steelman/positive framing of the free-tier removal plan before critiquing it",
+      "passed": true,
+      "evidence": "'Logic cắt giảm chi phí support ở đây hợp lý... hướng đi hoàn toàn có thể bảo vệ được về mặt tài chính.'"
+    },
+    {
+      "text": "Output identifies at least one unverified assumption specific to this plan, not generic advice",
+      "passed": true,
+      "evidence": "Three specific assumptions: traffic% != cost%, free tier as acquisition channel, conversion window too short."
+    },
+    {
+      "text": "Output offers at least one concrete alternative approach, not just 'consider other options'",
+      "passed": true,
+      "evidence": "'giữ free tier nhưng cắt kênh support tốn kém của nó' — community/FAQ/chatbot only, no live support."
+    },
+    {
+      "text": "Output describes a concrete consequence/risk if the identified weakness turns out true",
+      "passed": true,
+      "evidence": "Delayed-consequence paragraph: support cost drops short-term, lead volume drops 2-3 quarters later, backlash from abrupt cutoff."
+    },
+    {
+      "text": "Output ends with an open question or suggested next step for the user to verify",
+      "passed": true,
+      "evidence": "Two concrete verification questions (6-12mo conversion window, live-support-only pilot)."
+    },
+    {
+      "text": "Output does not simply agree with the plan without pushback",
+      "passed": true,
+      "evidence": "Substantial pushback throughout."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 62.1
+  }
+}

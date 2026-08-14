@@ -1,0 +1,43 @@
+{
+  "expectations": [
+    {
+      "text": "Output includes a steelman/positive framing of the free-tier removal plan before critiquing it",
+      "passed": true,
+      "evidence": "Opens with 'Tóm lại là: free tier đang tốn 80% công sức support mà tỷ lệ chuyển thành trả phí quá thấp... đây là vấn đề unit economics thực sự đáng xử lý, không phải chuyện nhỏ' — recaps the plan at its strongest before any pushback."
+    },
+    {
+      "text": "Output identifies at least one unverified assumption specific to this plan, not generic advice",
+      "passed": true,
+      "evidence": "Names three specific assumptions: '80% traffic support' conflated with 'free user tệ' vs missing self-service; conversion measured only short-term; sudden 0đ→299k barrier."
+    },
+    {
+      "text": "Output offers at least one concrete alternative approach, not just 'consider other options'",
+      "passed": true,
+      "evidence": "'tách kênh hỗ trợ (free chỉ có community/FAQ/chatbot...) và siết lại phạm vi tính năng của free tier' / 'đổi free vĩnh viễn thành free trial có thời hạn (ví dụ 14 ngày)'."
+    },
+    {
+      "text": "Output describes a concrete consequence/risk if the identified weakness turns out true",
+      "passed": true,
+      "evidence": "Paragraph starting 'Rủi ro nếu giả định sai:' spells out lead-loss and support-cost-not-actually-dropping scenarios."
+    },
+    {
+      "text": "Output ends with an open question or suggested next step for the user to verify",
+      "passed": true,
+      "evidence": "Closes with two verification questions plus a suggested 4-6 week pilot before full rollout."
+    },
+    {
+      "text": "Output does not simply agree with the plan without pushback",
+      "passed": true,
+      "evidence": "Substantial pushback throughout; never just endorses the plan."
+    }
+  ],
+  "summary": {
+    "passed": 6,
+    "failed": 0,
+    "total": 6,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 68.0
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "expectations": [
+    {
+      "text": "Output explicitly responds to the 'cho toi goc nhin khac' framing with a genuine alternative perspective, not just validation",
+      "passed": true,
+      "evidence": "Opens with surface-level validation then pivots hard into real pushback, not cheerleading."
+    },
+    {
+      "text": "Output flags runway (6 months) and early traction (12 users) as things to scrutinize",
+      "passed": true,
+      "evidence": "Directly interrogates both the runway framing and what the 12 users actually signal."
+    },
+    {
+      "text": "Output proposes a concrete alternative path or validation milestone before quitting",
+      "passed": true,
+      "evidence": "4-6 week validation window (week-2 retention, willingness to pay) while still employed."
+    },
+    {
+      "text": "Output includes an open question or next-step suggestion",
+      "passed": true,
+      "evidence": "Closes with two concrete self-check questions."
+    }
+  ],
+  "summary": {
+    "passed": 4,
+    "failed": 0,
+    "total": 4,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 56.1
+  }
+}

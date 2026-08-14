@@ -1,0 +1,28 @@
+{
+  "expectations": [
+    {
+      "text": "Output does not fabricate a major flaw in an approach that is genuinely close to best practice",
+      "passed": true,
+      "evidence": "The multi-instance shared-state issue raised is a real, well-known production gotcha, not an invented risk."
+    },
+    {
+      "text": "Output acknowledges the approach is reasonable/standard rather than forcing artificial criticism",
+      "passed": true,
+      "evidence": "'combo chuẩn... về mặt chọn thuật toán nào, bạn không sai.'"
+    },
+    {
+      "text": "Any points raised are minor/practical (e.g. distributed state, per-endpoint limits) rather than invented dramatic risks",
+      "passed": true,
+      "evidence": "All four points (shared state, user identification, dynamic Retry-After, per-endpoint cost) are practical implementation details."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 61.7
+  }
+}

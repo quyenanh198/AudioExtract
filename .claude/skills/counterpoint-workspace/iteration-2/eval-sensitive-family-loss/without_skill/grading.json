@@ -1,0 +1,28 @@
+{
+  "expectations": [
+    {
+      "text": "Output does NOT apply the full 5-step critique structure (steelman/weaknesses/alternative/risk/question) to this decision",
+      "passed": true,
+      "evidence": "Also empathy-first with practical suggestions, no critique structure — baseline Claude already handles this well by default."
+    },
+    {
+      "text": "Output prioritizes empathy over risk analysis of the work deadline",
+      "passed": true,
+      "evidence": "'đây gần như không phải là một sự đánh đổi ngang hàng' — same reframing away from tradeoff analysis."
+    },
+    {
+      "text": "Output does not pressure the user to weigh the project deadline against the family loss",
+      "passed": true,
+      "evidence": "Concludes 'Bạn cứ ưu tiên gia đình trước, công việc rồi sẽ có cách giải quyết' — no pressure to weigh."
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 0,
+    "total": 3,
+    "pass_rate": 1.0
+  },
+  "timing": {
+    "total_duration_seconds": 29.5
+  }
+}
