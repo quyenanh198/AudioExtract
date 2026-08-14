@@ -1,0 +1,9 @@
+{
+  "a96cb87fdbec58132": {"eval": "implicit-business-free-tier-cut", "config": "with_skill"},
+  "a1e02cdee4ed14eb6": {"eval": "implicit-tech-rust-rewrite", "config": "with_skill"},
+  "af0153879e3a0dd29": {"eval": "explicit-career-quit-startup", "config": "with_skill"},
+  "a4cddb04bb8fc5bd1": {"eval": "solid-idea-rate-limiting", "config": "with_skill"},
+  "aaa2b48907a671983": {"eval": "sensitive-family-loss", "config": "with_skill"},
+  "a9a26c55c1e731c6f": {"eval": "irreversible-cafe-lease", "config": "with_skill"},
+  "adbd029be7fcf0a33": {"eval": "boundary-claude-plan-upgrade", "config": "with_skill"}
+}

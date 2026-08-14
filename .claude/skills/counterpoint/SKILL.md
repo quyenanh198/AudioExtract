@@ -5,13 +5,17 @@ description: >
   ghi nhận điểm mạnh trước (steelman), rồi chỉ ra giả định chưa kiểm chứng, điểm
   yếu, rủi ro, và đưa ra ít nhất một góc nhìn/hướng đi khác cụ thể — không chỉ
   đồng tình hoặc chỉ liệt kê ưu/nhược điểm chung chung. Dùng skill này bất cứ khi
-  nào user chia sẻ một ý tưởng, kế hoạch, quyết định, hoặc quan điểm và có vẻ
-  đang cân nhắc/muốn được đánh giá — kể cả khi họ không gọi thẳng tên skill. Cũng
-  kích hoạt khi user hỏi rõ "phản biện giúp tôi", "critique this", "steelman
-  this", "poke holes in this", "what am I missing", "devil's advocate", hoặc
-  "cho tôi góc nhìn khác". Không dùng cho câu hỏi thông tin thuần túy không kèm
-  đề xuất/quan điểm, và không dùng khi user chỉ đang brainstorm mở (muốn thêm ý
-  tưởng, không phải phản biện ý đã có).
+  nào user chia sẻ một ý tưởng, kế hoạch, quyết định, hoặc quan điểm mà họ đã
+  nghiêng hẳn về và muốn được đánh giá — kể cả khi họ không gọi thẳng tên
+  skill. Cũng kích hoạt khi user hỏi rõ "phản biện giúp tôi", "critique this",
+  "steelman this", "poke holes in this", "what am I missing", "devil's
+  advocate", hoặc "cho tôi góc nhìn khác". Không dùng cho câu hỏi thông tin
+  thuần túy không kèm đề xuất/quan điểm, không dùng khi user chỉ đang
+  brainstorm mở (muốn thêm ý tưởng, không phải phản biện ý đã có), và không
+  dùng khi user đang xin tư vấn chọn giữa các phương án cụ thể (vd: "nên chọn
+  gói A hay B", "cái nào phù hợp hơn") mà chưa nghiêng về phương án nào — đó là
+  yêu cầu tư vấn cần câu trả lời trực tiếp, không phải một lập trường cần
+  phản biện.
 ---
 
 Việc của skill này không phải là bất đồng cho có, mà là làm cho ý tưởng của
@@ -24,15 +28,27 @@ rẻ.
 Hai kiểu:
 1. **User gọi rõ** — "phản biện giúp", "critique this", "devil's advocate",
    "cho góc nhìn khác", "poke holes"...
-2. **User trình bày một lập trường đang cân nhắc** — họ nói "tôi định làm X vì
-   Y", "kế hoạch là...", "tôi nghĩ nên...", tức là có một quyết định/ý tưởng cụ
-   thể đang treo, không phải câu hỏi thông tin đơn thuần.
+2. **User đã nghiêng hẳn về một hướng cụ thể và trình bày nó như lập trường
+   của mình** — họ nói "tôi định làm X vì Y", "kế hoạch là...", "tôi nghĩ nên
+   làm X". Điểm mấu chốt: X là lựa chọn họ đã chọn, không phải câu hỏi họ đang
+   ném ngược lại cho mình.
 
 Đừng kích hoạt nếu:
 - User chỉ hỏi thông tin ("X là gì", "làm sao để Y") không kèm quan điểm để
   phản biện.
 - User đang brainstorm mở, xin thêm ý tưởng/phương án — lúc đó việc cần là
   cộng thêm, không phải trừ bớt.
+- **User đang xin mình tư vấn/khuyên chọn giữa các phương án cụ thể** ("nên
+  chọn A hay B", "cái nào phù hợp hơn", "liệu X có đủ cho nhu cầu của tôi
+  không") mà chưa nghiêng về phương án nào để bảo vệ — đây là một câu hỏi cần
+  câu trả lời, không phải một lập trường cần phản biện. Trả lời thẳng là ưu
+  tiên số một; có thể lồng 1-2 lưu ý thật sự đáng giá (giả định ẩn, rủi ro nếu
+  chọn sai) nhưng đừng để câu trả lời biến thành một chuỗi câu hỏi ngược thay
+  vì đưa khuyến nghị, và đừng ép đủ cấu trúc 5 bước ở mục dưới.
+  - Ví dụ: "Tôi nên chọn gói 5x hay 20x?" → xin tư vấn, trả lời trực tiếp.
+    Khác hẳn "Tôi định lên thẳng 20x cho chắc, khỏi phải tính toán gì thêm" →
+    đây là một lập trường đã chọn, lúc này phản biện đúng chỗ (vd: có khi 5x
+    đã đủ, không cần trả dư).
 - Quyết định đã chốt và không thể đảo ngược, user đang tìm cách triển khai chứ
   không tìm feedback — phản biện lúc này chỉ gây khó chịu vô ích. Nếu không
   chắc, hỏi thẳng: "Bạn muốn phản biện hay giờ tập trung triển khai?"

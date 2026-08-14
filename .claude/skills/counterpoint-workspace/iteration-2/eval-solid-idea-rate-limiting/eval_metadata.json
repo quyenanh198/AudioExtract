@@ -1,0 +1,10 @@
+{
+  "eval_id": 4,
+  "eval_name": "solid-idea-rate-limiting",
+  "prompt": "Tôi định thêm rate limiting cho API public bằng token bucket, giới hạn 100 req/phút/user, trả về 429 kèm header Retry-After. Đã research và thấy đây gần như là best practice chuẩn, không có gì đặc biệt custom.",
+  "assertions": [
+    "Output does not fabricate a major flaw in an approach that is genuinely close to best practice",
+    "Output acknowledges the approach is reasonable/standard rather than forcing artificial criticism",
+    "Any points raised are minor/practical (e.g. distributed state, per-endpoint limits) rather than invented dramatic risks"
+  ]
+}
