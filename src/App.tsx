@@ -517,6 +517,14 @@ export default function App() {
                               {batchTasks[idx]!.status === 'failed' && <><FiX /> Failed</>}
                             </span>
                           )}
+                          {batchTasks?.[idx]?.status === 'failed' && batchTasks[idx]!.error && (
+                            <span
+                              title={batchTasks[idx]!.error}
+                              style={{ fontSize: '0.75rem', color: 'var(--color-error)', maxWidth: '38%', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                            >
+                              {batchTasks[idx]!.error}
+                            </span>
+                          )}
                         </div>
                       ))}
                     </div>

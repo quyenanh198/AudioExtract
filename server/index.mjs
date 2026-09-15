@@ -60,6 +60,19 @@ const safeName = (name) => (name || 'audio').replace(/[\\/\0]/g, '_').replace(/^
 
 const cookieArgs = () => (fs.existsSync(COOKIES_FILE) ? ['--cookies', COOKIES_FILE] : []);
 
+/** Turn yt-dlp's stderr into one line the UI can act on. */
+const explain = (stderr, fallback) => {
+  const text = String(stderr || '').trim();
+  if (/Sign in to confirm you.re not a bot|confirm your age|This video is age-restricted/i.test(text)) {
+    return fs.existsSync(COOKIES_FILE)
+      ? 'YouTube is asking for a login and the uploaded cookies were rejected — export a fresh cookies.txt (Settings) from a logged-in browser.'
+      : 'YouTube is asking for a login ("confirm you\'re not a bot"). Upload a cookies.txt in Settings, then retry.';
+  }
+  if (/Private video|Video unavailable|has been removed/i.test(text)) return 'Video unavailable (private, removed or region-locked).';
+  const last = text.split('\n').filter((l) => /error/i.test(l)).pop() || text.split('\n').pop();
+  return (last || fallback || 'yt-dlp failed').replace(/^ERROR:\s*/i, '');
+};
+
 const PROGRESS_RE = /\[download\]\s+(\d+\.?\d*)%\s+of\s+~?\s*([\d.]+\w+)\s+at\s+([\d.]+\w+\/s)\s+ETA\s+(\d+:\d+)/;
 const parseProgressLine = (line) => {
   const m = PROGRESS_RE.exec(line);
@@ -98,7 +111,7 @@ app.get('/api/info', async (req, res, next) => {
     try {
       ({ stdout } = await run(YTDLP, ['-j', '--flat-playlist', '--no-warnings', ...cookieArgs(), url], { timeout: 120_000 }));
     } catch (err) {
-      throw new HttpError(502, `yt-dlp failed: ${(err.stderr || err.message || '').trim().split('\n').pop()}`);
+      throw new HttpError(502, explain(err.stderr, err.message));
     }
     const videos = [];
     for (const line of stdout.split('\n')) {
@@ -198,7 +211,7 @@ const startJob = ({ taskId, url, format, quality }) => {
     if (cancelled) {
       await fsp.rm(dir, { recursive: true, force: true }).catch(() => {});
     } else if (code !== 0) {
-      const error = errorMsg.trim() || `yt-dlp exited with code ${code}`;
+      const error = explain(errorMsg, `yt-dlp exited with code ${code}`);
       emit('download-error', { taskId, error });
       remember({ taskId, success: false, error });
       await fsp.rm(dir, { recursive: true, force: true }).catch(() => {});
