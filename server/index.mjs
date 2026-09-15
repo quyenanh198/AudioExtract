@@ -312,6 +312,28 @@ app.post('/api/trim', async (req, res, next) => {
 });
 
 // ---------- serving & deleting results ----------
+/** Every finished result on disk (newest first) — what Musik's "import from AudioExtract" lists. */
+app.get('/api/files', async (_req, res, next) => {
+  try {
+    const out = [];
+    for (const dir of await fsp.readdir(OUT_DIR).catch(() => [])) {
+      const abs = path.join(OUT_DIR, dir);
+      const st = await fsp.stat(abs).catch(() => null);
+      if (!st?.isDirectory() || running.has(dir)) continue;
+      for (const name of await fsp.readdir(abs).catch(() => [])) {
+        if (name.startsWith('.') || /\.(part|ytdl|temp)$/i.test(name)) continue;
+        const fst = await fsp.stat(path.join(abs, name)).catch(() => null);
+        if (!fst?.isFile()) continue;
+        out.push({ path: `${dir}/${name}`, name, size: fst.size, updatedAt: fst.mtime.toISOString() });
+      }
+    }
+    out.sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+    res.json(out);
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.get('/api/files/{*rel}', (req, res, next) => {
   try {
     const rel = [].concat(req.params.rel ?? []).join('/');
