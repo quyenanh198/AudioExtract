@@ -1,0 +1,70 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  web:
+    name: Web app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: webapp
+          path: dist
+
+  windows:
+    name: Windows desktop
+    runs-on: windows-latest
+    env:
+      SIDECAR_DIR: src-tauri/binaries
+      TARGET_TRIPLE: x86_64-pc-windows-msvc
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - run: npm ci
+
+      # Tauri's externalBin expects "<name>-<target-triple>.exe" next to tauri.conf.json.
+      - name: Download yt-dlp and ffmpeg sidecars
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:SIDECAR_DIR | Out-Null
+          Invoke-WebRequest -Uri https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe `
+            -OutFile "$env:SIDECAR_DIR/yt-dlp-$env:TARGET_TRIPLE.exe"
+          Invoke-WebRequest -Uri https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip `
+            -OutFile ffmpeg.zip
+          Expand-Archive ffmpeg.zip -DestinationPath ffmpeg-tmp
+          Copy-Item (Get-ChildItem -Recurse ffmpeg-tmp -Filter ffmpeg.exe | Select-Object -First 1).FullName `
+            "$env:SIDECAR_DIR/ffmpeg-$env:TARGET_TRIPLE.exe"
+
+      - name: Rust tests
+        run: cargo test
+        working-directory: src-tauri
+
+      - name: Tauri build
+        run: npm run tauri build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-installers
+          path: |
+            src-tauri/target/release/bundle/msi/*.msi
+            src-tauri/target/release/bundle/nsis/*.exe

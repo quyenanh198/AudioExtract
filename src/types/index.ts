@@ -33,6 +33,7 @@ export interface AppSettings {
   language: 'vi' | 'en';
   autoUpdate: boolean;
   concurrentDownloads: number;
+  maxRetries: number;
 }
 
 export interface VideoInfo {

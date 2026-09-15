@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { FiDownload, FiAlertCircle, FiVolume2, FiVolumeX, FiSkipBack, FiSkipForward, FiRepeat, FiMoreVertical, FiPlay, FiPause } from 'react-icons/fi';
+import { FiDownload, FiAlertCircle, FiVolume2, FiVolumeX, FiSkipBack, FiSkipForward, FiRepeat, FiMoreVertical, FiPlay, FiPause, FiCheck, FiX } from 'react-icons/fi';
 import { listen } from '@tauri-apps/api/event';
 
 import { URLInput } from './components/URLInput';
@@ -14,6 +14,7 @@ import { useDownload } from './hooks/useDownload';
 import { useDownloadStore } from './store/downloadStore';
 import { VideoInfo as VideoInfoType, DownloadProgress, DownloadTask } from './types';
 import { formatDuration, formatFileSize } from './utils/formatUtils';
+import { DEFAULT_SETTINGS } from './utils/constants';
 import './index.css';
 import './App.css';
 
@@ -48,6 +49,10 @@ export default function App() {
   // Active task state
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [currentTask, setCurrentTask] = useState<DownloadTask | null>(null);
+  // Task ids for an in-flight playlist download, index-aligned with playlistItems
+  const [batchTaskIds, setBatchTaskIds] = useState<string[] | null>(null);
+  // 0 = first pass; n = nth retry pass over items that did not complete
+  const [retryRound, setRetryRound] = useState(0);
 
   // Player preview states
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
@@ -99,6 +104,9 @@ export default function App() {
       setCurrentTask(null);
     }
   }, [storeTasks, activeTaskId]);
+
+  const batchTasks = batchTaskIds?.map(id => storeTasks.find(t => t.id === id));
+  const batchDone = batchTasks?.filter(t => t && (t.status === 'completed' || t.status === 'failed')).length ?? 0;
 
   // Sync Audio player timeline
   useEffect(() => {
@@ -212,6 +220,8 @@ export default function App() {
     setLocalFilePath(null);
     setPreviewAudioUrl(null);
     setActiveTaskId(null);
+    setBatchTaskIds(null);
+    setRetryRound(0);
     setStartTime(0);
     setEndTime(0);
     setDuration(0);
@@ -226,39 +236,58 @@ export default function App() {
     // 1. Process URL downloads
     if (currentUrl) {
       if (playlistItems && playlistItems.length > 1) {
-        const downloadPromises = playlistItems.map((item, index) => {
-          return new Promise<void>((resolve) => {
-            setTimeout(async () => {
-              const tId = Math.random().toString(36).substring(7);
-              addTask({
-                id: tId,
-                url: item.originalUrl || currentUrl,
-                title: item.title,
-                status: 'queued',
-                createdAt: Date.now()
-              });
+        const taskIds = playlistItems.map(() => Math.random().toString(36).substring(7));
+        playlistItems.forEach((item, i) => addTask({
+          id: taskIds[i],
+          url: item.originalUrl || currentUrl,
+          title: item.title,
+          status: 'queued',
+          createdAt: Date.now()
+        }));
+        setBatchTaskIds(taskIds);
 
+        // Bounded worker pool: each worker pulls the next index until none remain.
+        // startDownload resolves only when yt-dlp exits, so at most
+        // `concurrency` processes run at once.
+        const runPass = async (indices: number[]) => {
+          let next = 0;
+          const worker = async () => {
+            while (next < indices.length) {
+              const i = indices[next++];
+              updateTask(taskIds[i], { status: 'downloading' });
               try {
-                updateTask(tId, { status: 'downloading' });
                 await startDownload({
-                  taskId: tId,
-                  url: item.originalUrl || currentUrl,
+                  taskId: taskIds[i],
+                  url: playlistItems[i].originalUrl || currentUrl,
                   format,
                   quality: qualityStr,
                   outputDir: settings.outputDir
                 });
               } catch (err) {
-                failTask(tId, err as string);
+                failTask(taskIds[i], String(err));
               }
-              resolve();
-            }, index * 100);
-          });
-        });
-        
-        setActiveTaskId(null);
-        Promise.all(downloadPromises).then(() => {
-          setTimeout(() => handleReset(), 2000);
-        });
+            }
+          };
+          const concurrency = Math.min(Math.max(1, settings.concurrentDownloads || 1), indices.length);
+          await Promise.all(Array.from({ length: concurrency }, worker));
+        };
+
+        // Items that did not complete are retried after the rest of the
+        // playlist has been attempted, up to maxRetries extra passes.
+        const maxRetries = settings.maxRetries ?? DEFAULT_SETTINGS.maxRetries;
+        let pending = playlistItems.map((_, i) => i);
+        for (let attempt = 0; attempt <= maxRetries && pending.length > 0; attempt++) {
+          if (attempt > 0) {
+            setRetryRound(attempt);
+            pending.forEach(i => updateTask(taskIds[i], { status: 'queued', progress: undefined, error: undefined }));
+          }
+          await runPass(pending);
+          const tasks = useDownloadStore.getState().tasks;
+          pending = pending.filter(i => tasks.find(t => t.id === taskIds[i])?.status !== 'completed');
+        }
+
+        // Keep the list on screen when something failed so the errors stay visible.
+        if (pending.length === 0) setTimeout(() => handleReset(), 2000);
         return;
       }
 
@@ -473,13 +502,56 @@ export default function App() {
                               {formatDuration(item.duration)} • {item.platform} • {item.uploader}
                             </div>
                           </div>
+                          {batchTasks?.[idx] && (
+                            <span style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px', color: batchTasks[idx]!.status === 'failed' ? 'var(--color-error)' : 'var(--color-accent)' }}>
+                              {batchTasks[idx]!.status === 'queued' && 'Queued'}
+                              {batchTasks[idx]!.status === 'downloading' && `${batchTasks[idx]!.progress?.percent ?? 0}%`}
+                              {batchTasks[idx]!.status === 'completed' && <><FiCheck /> Done</>}
+                              {batchTasks[idx]!.status === 'failed' && <><FiX /> Failed</>}
+                            </span>
+                          )}
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* 3. Progress panel */}
+                {/* 3a. Playlist progress panel */}
+                {batchTasks && (
+                  <div className="extraction-progress-card glass-panel" style={{ padding: 'var(--spacing-md)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-xs)' }}>
+                      <span style={{ fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FiDownload /> Playlist Progress
+                      </span>
+                      <span style={{ color: 'var(--color-accent)' }}>
+                        {retryRound > 0 && `Retry ${retryRound}/${settings.maxRetries ?? DEFAULT_SETTINGS.maxRetries} • `}
+                        {batchDone} / {batchTasks.length}
+                      </span>
+                    </div>
+                    <div style={{ background: 'rgba(255,255,255,0.05)', height: '8px', borderRadius: '4px', overflow: 'hidden', margin: '12px 0' }}>
+                      <div
+                        style={{
+                          width: `${(batchDone / batchTasks.length) * 100}%`,
+                          background: 'linear-gradient(90deg, #059669, #10b981)',
+                          height: '100%',
+                          transition: 'width 0.2s'
+                        }}
+                      />
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
+                      <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {batchDone < batchTasks.length
+                          ? `Downloading: ${batchTasks.filter(t => t?.status === 'downloading').map(t => t!.title).join(', ')}`
+                          : 'Done!'}
+                      </span>
+                      {batchDone === batchTasks.length && (
+                        <button className="btn-ghost" onClick={handleReset}>Clear</button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3b. Single item progress panel */}
                 {currentTask && (
                   <div className="extraction-progress-card glass-panel" style={{ padding: 'var(--spacing-md)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 'var(--spacing-xs)' }}>
@@ -684,7 +756,7 @@ export default function App() {
                   className="btn-primary" 
                   style={{ width: '100%', padding: '12px', fontSize: '1rem' }}
                   onClick={handleExtractAudio}
-                  disabled={!videoInfo || !!activeTaskId}
+                  disabled={!videoInfo || !!activeTaskId || !!batchTaskIds}
                 >
                   <FiDownload /> Extract Audio
                 </button>

@@ -82,73 +82,72 @@ pub async fn download_audio(
         downloads.insert(task_id.clone(), child);
     }
 
-    let app_clone = app.clone();
-    let task_id_clone = task_id.clone();
-    let downloads_arc = state.downloads.clone();
+    // Run to completion inside the command so the frontend's `await` resolves
+    // only when yt-dlp exits. Callers use this to sequence playlist items and
+    // bound concurrency; returning right after spawn made every playlist
+    // entry start at once.
+    let mut final_output_path = None;
+    let mut error_msg = String::new();
 
-    tauri::async_runtime::spawn(async move {
-        let mut final_output_path = None;
-        let mut error_msg = String::new();
-
-        let exit_code = drain_command_events(rx, |line| match line {
-            CommandLine::Stdout(line) => {
-                if let Some(prog) = parse_progress_line(&line) {
-                    let _ = app_clone.emit("download-progress", DownloadProgressEvent {
-                        task_id: task_id_clone.clone(),
-                        progress: prog,
-                    });
-                }
-
-                if line.contains("[ExtractAudio] Destination: ") {
-                    let path = line.split("[ExtractAudio] Destination: ").nth(1).unwrap_or("").trim().to_string();
-                    if !path.is_empty() { final_output_path = Some(path); }
-                } else if line.contains("[download] Destination: ") {
-                    let path = line.split("[download] Destination: ").nth(1).unwrap_or("").trim().to_string();
-                    if !path.is_empty() { final_output_path = Some(path); }
-                }
+    let exit_code = drain_command_events(rx, |line| match line {
+        CommandLine::Stdout(line) => {
+            if let Some(prog) = parse_progress_line(&line) {
+                let _ = app.emit("download-progress", DownloadProgressEvent {
+                    task_id: task_id.clone(),
+                    progress: prog,
+                });
             }
-            CommandLine::Stderr(line) => {
-                if line.to_lowercase().contains("error") {
-                    error_msg.push_str(&line);
-                    error_msg.push('\n');
-                }
-            }
-        })
-        .await;
-        let has_error = exit_code != Some(0);
 
-        {
-            let mut downloads = downloads_arc.lock().await;
-            downloads.remove(&task_id_clone);
+            if line.contains("[ExtractAudio] Destination: ") {
+                let path = line.split("[ExtractAudio] Destination: ").nth(1).unwrap_or("").trim().to_string();
+                if !path.is_empty() { final_output_path = Some(path); }
+            } else if line.contains("[download] Destination: ") {
+                let path = line.split("[download] Destination: ").nth(1).unwrap_or("").trim().to_string();
+                if !path.is_empty() { final_output_path = Some(path); }
+            }
         }
-
-        if has_error {
-            let _ = app_clone.emit("download-error", DownloadErrorEvent {
-                task_id: task_id_clone.clone(),
-                error: error_msg.clone(),
-            });
-            let _ = app_clone.emit("download-finished", DownloadFinishedEvent {
-                task_id: task_id_clone,
-                output_path: None,
-                file_size: None,
-                success: false,
-                error: Some(error_msg),
-            });
-        } else {
-            let mut size = None;
-            if let Some(ref path) = final_output_path {
-                if let Ok(metadata) = std::fs::metadata(path) {
-                    size = Some(metadata.len());
-                }
+        CommandLine::Stderr(line) => {
+            if line.to_lowercase().contains("error") {
+                error_msg.push_str(&line);
+                error_msg.push('\n');
             }
-            let _ = app_clone.emit("download-finished", DownloadFinishedEvent {
-                task_id: task_id_clone,
-                output_path: final_output_path,
-                file_size: size,
-                success: true,
-                error: None,
-            });
         }
+    })
+    .await;
+    let has_error = exit_code != Some(0);
+
+    state.downloads.lock().await.remove(&task_id);
+
+    if has_error {
+        if error_msg.is_empty() {
+            error_msg = format!("yt-dlp exited with code {:?}", exit_code);
+        }
+        let _ = app.emit("download-error", DownloadErrorEvent {
+            task_id: task_id.clone(),
+            error: error_msg.clone(),
+        });
+        let _ = app.emit("download-finished", DownloadFinishedEvent {
+            task_id,
+            output_path: None,
+            file_size: None,
+            success: false,
+            error: Some(error_msg.clone()),
+        });
+        return Err(error_msg);
+    }
+
+    let mut size = None;
+    if let Some(ref path) = final_output_path {
+        if let Ok(metadata) = std::fs::metadata(path) {
+            size = Some(metadata.len());
+        }
+    }
+    let _ = app.emit("download-finished", DownloadFinishedEvent {
+        task_id,
+        output_path: final_output_path,
+        file_size: size,
+        success: true,
+        error: None,
     });
 
     Ok(())

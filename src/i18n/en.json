@@ -53,6 +53,7 @@
     "language": "Language",
     "autoUpdate": "Auto Update",
     "concurrent": "Concurrent Downloads",
+    "maxRetries": "Max Retries (playlist)",
     "browse": "Browse"
   },
   "common": {
