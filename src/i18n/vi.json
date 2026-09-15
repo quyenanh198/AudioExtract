@@ -45,7 +45,9 @@
     "openFolder": "Mở thư mục",
     "delete": "Xóa",
     "clear": "Xóa tất cả",
-    "download": "Tải về"
+    "download": "Tải về",
+    "rename": "Đổi tên",
+    "renamePrompt": "Tên mới"
   },
   "settings": {
     "title": "Cài đặt",

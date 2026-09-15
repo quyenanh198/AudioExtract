@@ -43,6 +43,13 @@ export const webExtras = {
     return request<CookiesStatus>('/api/cookies', { method: 'POST', body: form });
   },
   deleteCookies: () => request<void>('/api/cookies', { method: 'DELETE' }),
+  /** Rename a result on the server; returns its new relative path. */
+  renameFile: (path: string, name: string) =>
+    request<{ path: string; name: string }>('/api/files/rename', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ path, name }),
+    }),
   musikPlaylists: () => request<MusikPlaylist[]>('/api/musik/playlists'),
   importToMusik: (path: string, playlistId?: number) =>
     request<{ track: { id: number; title: string }; playlist: { id: number; name: string } | null }>('/api/musik/import', {

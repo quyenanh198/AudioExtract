@@ -4,12 +4,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useDownloadStore } from '../store/downloadStore';
 import { backend } from '../platform';
 import { SendToMusik } from './SendToMusik';
-import { FiFolder, FiPlay, FiTrash2, FiSearch, FiDownload } from 'react-icons/fi';
+import { FiFolder, FiPlay, FiTrash2, FiSearch, FiDownload, FiEdit2 } from 'react-icons/fi';
+import { webExtras } from '../platform/webExtras';
 import './DownloadHistory.css';
 
 export const DownloadHistory: React.FC = () => {
   const { t } = useTranslation();
-  const { history, removeFromHistory, clearHistory } = useDownloadStore();
+  const { history, removeFromHistory, clearHistory, updateHistoryItem } = useDownloadStore();
   const [searchQuery, setSearchQuery] = useState('');
 
   const formatBytes = (bytes: number, decimals = 2) => {
@@ -48,6 +49,18 @@ export const DownloadHistory: React.FC = () => {
       await backend.revealFile(path);
     } catch (e) {
       console.error('Failed to open folder:', e);
+    }
+  };
+
+  // Web: rename the file on the server and the row here (extension is kept).
+  const handleRename = async (id: string, title: string, outputPath: string) => {
+    const name = window.prompt(t('history.renamePrompt', 'New name'), title)?.trim();
+    if (!name || name === title) return;
+    try {
+      const renamed = await webExtras.renameFile(outputPath, name);
+      updateHistoryItem(id, { title: renamed.name.replace(/\.[^.]+$/, ''), outputPath: renamed.path });
+    } catch (e) {
+      window.alert((e as Error).message);
     }
   };
 
@@ -112,7 +125,12 @@ export const DownloadHistory: React.FC = () => {
                 </div>
                 
                 <div className="history-item-actions">
-                  {isWeb && item.outputPath && <SendToMusik outputPath={item.outputPath} compact />}
+                  {isWeb && item.outputPath && (
+                    <button className="btn-secondary" onClick={() => handleRename(item.id, item.title, item.outputPath)} title={t('history.rename', 'Rename')}>
+                      <FiEdit2 />
+                    </button>
+                  )}
+                  {isWeb && item.outputPath && <SendToMusik key={item.outputPath} outputPath={item.outputPath} compact />}
                   <button className="btn-secondary" onClick={() => handleOpenFile(item.outputPath)} title={t('history.openFile', 'Open File')}>
                     <FiPlay />
                   </button>

@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { FiDownload, FiAlertCircle, FiVolume2, FiVolumeX, FiSkipBack, FiSkipForward, FiRepeat, FiMoreVertical, FiPlay, FiPause, FiCheck, FiX, FiSave } from 'react-icons/fi';
+import { FiDownload, FiAlertCircle, FiVolume2, FiVolumeX, FiSkipBack, FiSkipForward, FiRepeat, FiMoreVertical, FiPlay, FiPause, FiCheck, FiX, FiSave, FiEdit2 } from 'react-icons/fi';
 import { backend, LocalFile } from './platform';
 import { SendToMusik } from './components/SendToMusik';
+import { webExtras } from './platform/webExtras';
 
 import { URLInput } from './components/URLInput';
 import { DownloadHistory } from './components/DownloadHistory';
@@ -25,7 +26,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState<PageState>('home');
   const { settings, updateSettings, initSettings } = useSettings();
   const { fetchVideoInfo, startDownload, trimAudio } = useDownload();
-  const { addTask, updateTask, completeTask, failTask } = useDownloadStore();
+  const { addTask, updateTask, completeTask, failTask, updateHistoryItem } = useDownloadStore();
 
   const [videoInfo, setVideoInfo] = useState<VideoInfoType | null>(null);
   const [playlistItems, setPlaylistItems] = useState<VideoInfoType[] | null>(null);
@@ -341,6 +342,24 @@ export default function App() {
     }
   };
 
+  // Web: rename the finished file (server + task + history row).
+  const handleRenameResult = async (task: DownloadTask) => {
+    if (!task.outputPath) return;
+    const current = task.outputPath.split('/').pop()?.replace(/\.[^.]+$/, '') ?? task.title ?? '';
+    const name = window.prompt(t('history.renamePrompt', 'New name'), current)?.trim();
+    if (!name || name === current) return;
+    try {
+      const renamed = await webExtras.renameFile(task.outputPath, name);
+      const title = renamed.name.replace(/\.[^.]+$/, '');
+      updateTask(task.id, { outputPath: renamed.path, title });
+      updateHistoryItem(task.id, { outputPath: renamed.path, title });
+      setPreviewAudioUrl(backend.fileUrl(renamed.path));
+      setPreviewDownloadUrl(backend.downloadUrl(renamed.path));
+    } catch (e) {
+      window.alert((e as Error).message);
+    }
+  };
+
   // Estimate file size: (bitrate * duration) / 8
   const getEstimatedSize = () => {
     const activeDuration = useFullTrack ? duration : (endTime - startTime);
@@ -568,7 +587,7 @@ export default function App() {
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                      <span>Extracting: {videoInfo?.title}</span>
+                      <span>{currentTask.status === 'completed' && currentTask.outputPath ? currentTask.outputPath.split('/').pop() : `Extracting: ${videoInfo?.title}`}</span>
                       <span>Format: {selectedFormat} • Quality: {selectedQuality} kbps • Channels: Stereo</span>
                     </div>
                     {currentTask.status === 'failed' && currentTask.error && (
@@ -577,7 +596,12 @@ export default function App() {
                     {(currentTask.status === 'completed' || currentTask.status === 'failed') && (
                       <div style={{ marginTop: '12px', display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap', alignItems: 'center' }}>
                         {currentTask.status === 'completed' && currentTask.outputPath && backend.kind === 'web' && (
-                          <SendToMusik outputPath={currentTask.outputPath} />
+                          <>
+                            <button className="btn-secondary" onClick={() => void handleRenameResult(currentTask)} title={t('history.rename', 'Rename')}>
+                              <FiEdit2 /> {t('history.rename', 'Rename')}
+                            </button>
+                            <SendToMusik key={currentTask.outputPath} outputPath={currentTask.outputPath} />
+                          </>
                         )}
                         {currentTask.status === 'completed' && currentTask.outputPath && backend.downloadUrl(currentTask.outputPath) && (
                           <a className="btn-primary" href={backend.downloadUrl(currentTask.outputPath) ?? undefined} download style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', width: 'auto', padding: '0 16px' }}>

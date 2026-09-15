@@ -16,6 +16,7 @@ interface DownloadStore {
   getQueuedTasks: () => DownloadTask[];
   addToHistory: (item: DownloadHistoryItem) => void;
   removeFromHistory: (id: string) => void;
+  updateHistoryItem: (id: string, updates: Partial<DownloadHistoryItem>) => void;
   clearHistory: () => void;
 }
 
@@ -65,6 +66,9 @@ export const useDownloadStore = create<DownloadStore>()(
       getQueuedTasks: () => get().tasks.filter(t => t.status === 'queued'),
       addToHistory: (item) => set((state) => ({ history: [item, ...state.history] })),
       removeFromHistory: (id) => set((state) => ({ history: state.history.filter(h => h.id !== id) })),
+      updateHistoryItem: (id, updates) => set((state) => ({
+        history: state.history.map(h => h.id === id ? { ...h, ...updates } : h)
+      })),
       clearHistory: () => set({ history: [] })
     }),
     {

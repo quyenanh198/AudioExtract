@@ -45,7 +45,9 @@
     "openFolder": "Open Folder",
     "delete": "Delete",
     "clear": "Clear All",
-    "download": "Download"
+    "download": "Download",
+    "rename": "Rename",
+    "renamePrompt": "New name"
   },
   "settings": {
     "title": "Settings",

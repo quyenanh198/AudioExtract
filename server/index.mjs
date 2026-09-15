@@ -348,6 +348,31 @@ app.get('/api/files/{*rel}', (req, res, next) => {
   }
 });
 
+/** Rename a result in place: `{ path, name }` → new name keeps the original extension. */
+app.post('/api/files/rename', async (req, res, next) => {
+  try {
+    const { path: rel, name } = req.body ?? {};
+    if (typeof rel !== 'string' || !rel) throw new HttpError(400, '"path" is required');
+    const abs = inside(OUT_DIR, rel);
+    if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) throw new HttpError(404, 'File not found');
+    const ext = path.extname(abs);
+    let base = safeName(String(name ?? '').trim());
+    if (!base || base === '_') throw new HttpError(400, '"name" is required');
+    if (path.extname(base).toLowerCase() === ext.toLowerCase()) base = base.slice(0, -ext.length);
+    const next = path.join(path.dirname(abs), `${base}${ext}`);
+    if (next !== abs && fs.existsSync(next)) throw new HttpError(409, 'A file with that name already exists');
+    if (next !== abs) await fsp.rename(abs, next);
+    const newRel = path.relative(OUT_DIR, next).split(path.sep).join('/');
+    // Keep the remembered finish event pointing at the file for late pollers.
+    const dirId = newRel.split('/')[0];
+    const r = results.get(dirId);
+    if (r?.event?.outputPath === rel) r.event.outputPath = newRel;
+    res.json({ path: newRel, name: path.basename(next) });
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.delete('/api/files/{*rel}', async (req, res, next) => {
   try {
     const rel = [].concat(req.params.rel ?? []).join('/');
