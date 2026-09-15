@@ -68,5 +68,23 @@
     "save": "Lưu",
     "close": "Đóng",
     "newExtraction": "Trích xuất mới"
+  },
+  "musik": {
+    "send": "Thêm vào Musik",
+    "sending": "Đang gửi…",
+    "added": "Đã thêm vào Musik",
+    "addedTo": "Đã thêm vào {{name}}",
+    "libraryOnly": "Musik: thư viện",
+    "hint": "Chép tệp này vào thư viện Musik"
+  },
+  "cookies": {
+    "title": "Cookies yt-dlp (đăng nhập YouTube)",
+    "hint": "Khi YouTube đòi \"xác nhận bạn không phải bot\", xuất cookies.txt (định dạng Netscape) từ trình duyệt đã đăng nhập bằng tiện ích như \"Get cookies.txt LOCALLY\" rồi tải lên đây. Nên dùng tài khoản phụ.",
+    "present": "Đã tải lên {{date}} ({{size}} KB)",
+    "absent": "Chưa có cookies — tải ẩn danh.",
+    "upload": "Tải lên cookies.txt",
+    "replace": "Thay thế",
+    "remove": "Xoá",
+    "removeConfirm": "Xoá tệp cookies?"
   }
 }

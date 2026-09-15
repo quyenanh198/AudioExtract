@@ -125,3 +125,7 @@
   font-size: 0.85rem;
   color: var(--color-text-secondary);
 }
+
+.send-to-musik { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.send-to-musik__select { max-width: 180px; padding: 6px 8px; }
+.send-to-musik__error { color: var(--color-error); font-size: 0.8rem; }

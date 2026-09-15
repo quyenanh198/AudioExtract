@@ -212,3 +212,18 @@ button {
   font-size: 0.75rem;
   font-weight: 600;
 }
+
+.btn-danger {
+  background: rgba(244, 63, 94, 0.12);
+  color: var(--color-error);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.btn-danger:hover { background: rgba(244, 63, 94, 0.2); }
+.btn-danger:disabled { opacity: 0.5; cursor: not-allowed; }

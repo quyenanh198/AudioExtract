@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { FiDownload, FiAlertCircle, FiVolume2, FiVolumeX, FiSkipBack, FiSkipForward, FiRepeat, FiMoreVertical, FiPlay, FiPause, FiCheck, FiX, FiSave } from 'react-icons/fi';
 import { backend, LocalFile } from './platform';
+import { SendToMusik } from './components/SendToMusik';
 
 import { URLInput } from './components/URLInput';
 import { DownloadHistory } from './components/DownloadHistory';
@@ -574,7 +575,10 @@ export default function App() {
                       <div style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--color-error)', whiteSpace: 'pre-wrap' }}>{currentTask.error}</div>
                     )}
                     {(currentTask.status === 'completed' || currentTask.status === 'failed') && (
-                      <div style={{ marginTop: '12px', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                      <div style={{ marginTop: '12px', display: 'flex', gap: '8px', justifyContent: 'flex-end', flexWrap: 'wrap', alignItems: 'center' }}>
+                        {currentTask.status === 'completed' && currentTask.outputPath && backend.kind === 'web' && (
+                          <SendToMusik outputPath={currentTask.outputPath} />
+                        )}
                         {currentTask.status === 'completed' && currentTask.outputPath && backend.downloadUrl(currentTask.outputPath) && (
                           <a className="btn-primary" href={backend.downloadUrl(currentTask.outputPath) ?? undefined} download style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', width: 'auto', padding: '0 16px' }}>
                             <FiSave /> {t('history.download', 'Download')}

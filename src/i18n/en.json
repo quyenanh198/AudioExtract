@@ -68,5 +68,23 @@
     "save": "Save",
     "close": "Close",
     "newExtraction": "New extraction"
+  },
+  "musik": {
+    "send": "Add to Musik",
+    "sending": "Sending…",
+    "added": "Added to Musik",
+    "addedTo": "Added to {{name}}",
+    "libraryOnly": "Musik: library",
+    "hint": "Copy this file into your Musik library"
+  },
+  "cookies": {
+    "title": "yt-dlp cookies (YouTube login)",
+    "hint": "When YouTube asks to \"confirm you're not a bot\", export cookies.txt (Netscape format) from a logged-in browser with an extension such as \"Get cookies.txt LOCALLY\" and upload it here. Use a throwaway account.",
+    "present": "Uploaded {{date}} ({{size}} KB)",
+    "absent": "No cookies file — downloads run anonymously.",
+    "upload": "Upload cookies.txt",
+    "replace": "Replace",
+    "remove": "Remove",
+    "removeConfirm": "Remove the cookies file?"
   }
 }

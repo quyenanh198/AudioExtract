@@ -20,6 +20,12 @@ const FFMPEG = process.env.FFMPEG_BIN || 'ffmpeg';
 const MAX_PARALLEL = Number(process.env.MAX_PARALLEL_DOWNLOADS || 2);
 const KEEP_DAYS = Number(process.env.KEEP_DAYS || 7);
 const MAX_UPLOAD_MB = Number(process.env.MAX_UPLOAD_MB || 2048);
+// Netscape cookies.txt exported from a logged-in browser; lets yt-dlp past
+// YouTube's "confirm you're not a bot" wall. Optional, uploaded via the UI.
+const COOKIES_FILE = path.join(DATA_DIR, 'cookies.txt');
+// Base URL of the Musik server on the docker network (no auth there); when
+// set, results can be pushed straight into the Musik library.
+const MUSIK_URL = (process.env.MUSIK_URL || '').replace(/\/$/, '');
 
 for (const dir of [OUT_DIR, IN_DIR]) fs.mkdirSync(dir, { recursive: true });
 
@@ -51,6 +57,8 @@ const inside = (root, rel) => {
 };
 
 const safeName = (name) => (name || 'audio').replace(/[\\/\0]/g, '_').replace(/^\.+/, '_').slice(0, 200);
+
+const cookieArgs = () => (fs.existsSync(COOKIES_FILE) ? ['--cookies', COOKIES_FILE] : []);
 
 const PROGRESS_RE = /\[download\]\s+(\d+\.?\d*)%\s+of\s+~?\s*([\d.]+\w+)\s+at\s+([\d.]+\w+\/s)\s+ETA\s+(\d+:\d+)/;
 const parseProgressLine = (line) => {
@@ -88,7 +96,7 @@ app.get('/api/info', async (req, res, next) => {
     if (!/^https?:\/\//i.test(url)) throw new HttpError(400, 'A http(s) URL is required');
     let stdout;
     try {
-      ({ stdout } = await run(YTDLP, ['-j', '--flat-playlist', '--no-warnings', url], { timeout: 120_000 }));
+      ({ stdout } = await run(YTDLP, ['-j', '--flat-playlist', '--no-warnings', ...cookieArgs(), url], { timeout: 120_000 }));
     } catch (err) {
       throw new HttpError(502, `yt-dlp failed: ${(err.stderr || err.message || '').trim().split('\n').pop()}`);
     }
@@ -153,6 +161,7 @@ const startJob = ({ taskId, url, format, quality }) => {
     '--newline',
     '--no-playlist',
     '--no-warnings',
+    ...cookieArgs(),
     '--extract-audio',
     '--audio-format',
     format,
@@ -330,6 +339,103 @@ app.delete('/api/files/{*rel}', async (req, res, next) => {
     next(err);
   }
 });
+
+// ---------- cookies.txt for yt-dlp ----------
+const cookiesStatus = () => {
+  try {
+    const st = fs.statSync(COOKIES_FILE);
+    return { present: true, size: st.size, updatedAt: st.mtime.toISOString() };
+  } catch {
+    return { present: false };
+  }
+};
+
+app.get('/api/cookies', (_req, res) => res.json(cookiesStatus()));
+
+app.post('/api/cookies', multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024 } }).single('file'), async (req, res, next) => {
+  try {
+    if (!req.file) throw new HttpError(400, 'No file uploaded');
+    const text = req.file.buffer.toString('utf8');
+    // Netscape format: comment header or tab-separated 7-column lines.
+    const looksRight = /^# (Netscape )?HTTP Cookie File/m.test(text) || text.split('\n').some((l) => l.split('\t').length >= 7);
+    if (!looksRight) throw new HttpError(400, 'Not a Netscape cookies.txt file');
+    await fsp.writeFile(COOKIES_FILE, text, { mode: 0o600 });
+    res.status(201).json(cookiesStatus());
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.delete('/api/cookies', async (_req, res, next) => {
+  try {
+    await fsp.rm(COOKIES_FILE, { force: true });
+    res.status(204).end();
+  } catch (err) {
+    next(err);
+  }
+});
+
+// ---------- push results into Musik ----------
+const AUDIO_TYPES = { mp3: 'audio/mpeg', m4a: 'audio/mp4', aac: 'audio/aac', wav: 'audio/wav', flac: 'audio/flac', opus: 'audio/ogg', ogg: 'audio/ogg', oga: 'audio/ogg', webm: 'audio/webm', mka: 'audio/x-matroska' };
+
+const musikFetch = async (route, init) => {
+  if (!MUSIK_URL) throw new HttpError(404, 'Musik is not configured');
+  let res;
+  try {
+    res = await fetch(`${MUSIK_URL}${route}`, init);
+  } catch (err) {
+    throw new HttpError(502, `Musik unreachable: ${err.message}`);
+  }
+  if (!res.ok) {
+    let msg = `${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      if (body && typeof body.error === 'string') msg = body.error;
+    } catch {
+      /* not json */
+    }
+    throw new HttpError(502, `Musik: ${msg}`);
+  }
+  return res.status === 204 ? null : res.json();
+};
+
+app.get('/api/musik/playlists', async (_req, res, next) => {
+  try {
+    res.json(await musikFetch('/api/playlists'));
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.post('/api/musik/import', async (req, res, next) => {
+  try {
+    const { path: rel, playlistId } = req.body ?? {};
+    if (typeof rel !== 'string' || !rel) throw new HttpError(400, '"path" is required');
+    const abs = inside(OUT_DIR, rel);
+    if (!fs.existsSync(abs) || !fs.statSync(abs).isFile()) throw new HttpError(404, 'File not found');
+    const name = path.basename(abs);
+    const type = AUDIO_TYPES[path.extname(name).slice(1).toLowerCase()];
+    if (!type) throw new HttpError(415, `Musik cannot play .${path.extname(name).slice(1)}`);
+    const form = new FormData();
+    form.append('file', new Blob([await fsp.readFile(abs)], { type }), name);
+    const track = await musikFetch('/api/tracks', { method: 'POST', body: form });
+    let playlist = null;
+    if (playlistId !== undefined && playlistId !== null && playlistId !== '') {
+      const id = Number(playlistId);
+      if (!Number.isInteger(id)) throw new HttpError(400, 'Invalid playlistId');
+      playlist = await musikFetch(`/api/playlists/${id}/tracks`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ trackIds: [track.id] }),
+      });
+    }
+    res.status(201).json({ track, playlist: playlist ? { id: playlist.id, name: playlist.name } : null });
+  } catch (err) {
+    next(err);
+  }
+});
+
+app.get('/api/status', (_req, res) => res.json({ musik: Boolean(MUSIK_URL), cookies: cookiesStatus() }));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, running: running.size, queued: queue.length }));
 

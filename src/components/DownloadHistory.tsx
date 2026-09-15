@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDownloadStore } from '../store/downloadStore';
 import { backend } from '../platform';
+import { SendToMusik } from './SendToMusik';
 import { FiFolder, FiPlay, FiTrash2, FiSearch, FiDownload } from 'react-icons/fi';
 import './DownloadHistory.css';
 
@@ -111,6 +112,7 @@ export const DownloadHistory: React.FC = () => {
                 </div>
                 
                 <div className="history-item-actions">
+                  {isWeb && item.outputPath && <SendToMusik outputPath={item.outputPath} compact />}
                   <button className="btn-secondary" onClick={() => handleOpenFile(item.outputPath)} title={t('history.openFile', 'Open File')}>
                     <FiPlay />
                   </button>

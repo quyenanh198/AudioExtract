@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSettings } from '../hooks/useSettings';
 import { FiFolder, FiSave, FiCheck } from 'react-icons/fi';
+import { CookiesSettings } from './CookiesSettings';
 import './SettingsPanel.css';
 
 const SUPPORTED_FORMATS = ['MP3', 'FLAC', 'WAV', 'M4A', 'Opus', 'AAC'];
@@ -154,6 +155,8 @@ export const SettingsPanel: React.FC = () => {
             />
           </div>
         </div>
+
+        {!canChooseOutputDir && <CookiesSettings />}
 
         <div className="settings-actions">
           <button className="btn-primary" onClick={handleSave}>
