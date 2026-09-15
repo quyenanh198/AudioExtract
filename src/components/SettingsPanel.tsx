@@ -134,6 +134,18 @@ export const SettingsPanel: React.FC = () => {
               onChange={(e) => setLocalSettings({...localSettings, concurrentDownloads: parseInt(e.target.value) || 1})}
             />
           </div>
+
+          <div className="form-group">
+            <label>{t('settings.maxRetries', 'Max Retries (playlist)')}</label>
+            <input 
+              type="number" 
+              className="input-field" 
+              min="0" 
+              max="20"
+              value={localSettings.maxRetries ?? 5}
+              onChange={(e) => setLocalSettings({...localSettings, maxRetries: Math.max(0, parseInt(e.target.value) || 0)})}
+            />
+          </div>
         </div>
 
         <div className="settings-actions">

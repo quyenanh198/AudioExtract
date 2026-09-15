@@ -53,6 +53,7 @@
     "language": "Ngôn ngữ",
     "autoUpdate": "Tự động cập nhật",
     "concurrent": "Số lượt tải đồng thời",
+    "maxRetries": "Số lần thử lại tối đa (playlist)",
     "browse": "Duyệt"
   },
   "common": {

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { FiDownload, FiAlertCircle, FiVolume2, FiVolumeX, FiSkipBack, FiSkipForward, FiRepeat, FiMoreVertical, FiPlay, FiPause } from 'react-icons/fi';
+import { FiDownload, FiAlertCircle, FiVolume2, FiVolumeX, FiSkipBack, FiSkipForward, FiRepeat, FiMoreVertical, FiPlay, FiPause, FiCheck, FiX } from 'react-icons/fi';
 import { listen } from '@tauri-apps/api/event';
 
 import { URLInput } from './components/URLInput';
@@ -14,6 +14,7 @@ import { useDownload } from './hooks/useDownload';
 import { useDownloadStore } from './store/downloadStore';
 import { VideoInfo as VideoInfoType, DownloadProgress, DownloadTask } from './types';
 import { formatDuration, formatFileSize } from './utils/formatUtils';
+import { DEFAULT_SETTINGS } from './utils/constants';
 import './index.css';
 import './App.css';
 
@@ -50,6 +51,8 @@ export default function App() {
   const [currentTask, setCurrentTask] = useState<DownloadTask | null>(null);
   // Task ids for an in-flight playlist download, index-aligned with playlistItems
   const [batchTaskIds, setBatchTaskIds] = useState<string[] | null>(null);
+  // 0 = first pass; n = nth retry pass over items that did not complete
+  const [retryRound, setRetryRound] = useState(0);
 
   // Player preview states
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
@@ -218,6 +221,7 @@ export default function App() {
     setPreviewAudioUrl(null);
     setActiveTaskId(null);
     setBatchTaskIds(null);
+    setRetryRound(0);
     setStartTime(0);
     setEndTime(0);
     setDuration(0);
@@ -245,30 +249,45 @@ export default function App() {
         // Bounded worker pool: each worker pulls the next index until none remain.
         // startDownload resolves only when yt-dlp exits, so at most
         // `concurrency` processes run at once.
-        let next = 0;
-        const worker = async () => {
-          while (next < playlistItems.length) {
-            const i = next++;
-            updateTask(taskIds[i], { status: 'downloading' });
-            try {
-              await startDownload({
-                taskId: taskIds[i],
-                url: playlistItems[i].originalUrl || currentUrl,
-                format,
-                quality: qualityStr,
-                outputDir: settings.outputDir
-              });
-            } catch (err) {
-              failTask(taskIds[i], String(err));
+        const runPass = async (indices: number[]) => {
+          let next = 0;
+          const worker = async () => {
+            while (next < indices.length) {
+              const i = indices[next++];
+              updateTask(taskIds[i], { status: 'downloading' });
+              try {
+                await startDownload({
+                  taskId: taskIds[i],
+                  url: playlistItems[i].originalUrl || currentUrl,
+                  format,
+                  quality: qualityStr,
+                  outputDir: settings.outputDir
+                });
+              } catch (err) {
+                failTask(taskIds[i], String(err));
+              }
             }
-          }
+          };
+          const concurrency = Math.min(Math.max(1, settings.concurrentDownloads || 1), indices.length);
+          await Promise.all(Array.from({ length: concurrency }, worker));
         };
-        const concurrency = Math.min(Math.max(1, settings.concurrentDownloads || 1), playlistItems.length);
-        await Promise.all(Array.from({ length: concurrency }, worker));
+
+        // Items that did not complete are retried after the rest of the
+        // playlist has been attempted, up to maxRetries extra passes.
+        const maxRetries = settings.maxRetries ?? DEFAULT_SETTINGS.maxRetries;
+        let pending = playlistItems.map((_, i) => i);
+        for (let attempt = 0; attempt <= maxRetries && pending.length > 0; attempt++) {
+          if (attempt > 0) {
+            setRetryRound(attempt);
+            pending.forEach(i => updateTask(taskIds[i], { status: 'queued', progress: undefined, error: undefined }));
+          }
+          await runPass(pending);
+          const tasks = useDownloadStore.getState().tasks;
+          pending = pending.filter(i => tasks.find(t => t.id === taskIds[i])?.status !== 'completed');
+        }
 
         // Keep the list on screen when something failed so the errors stay visible.
-        const allOk = taskIds.every(id => useDownloadStore.getState().tasks.find(t => t.id === id)?.status === 'completed');
-        if (allOk) setTimeout(() => handleReset(), 2000);
+        if (pending.length === 0) setTimeout(() => handleReset(), 2000);
         return;
       }
 
@@ -484,11 +503,11 @@ export default function App() {
                             </div>
                           </div>
                           {batchTasks?.[idx] && (
-                            <span style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', color: batchTasks[idx]!.status === 'failed' ? 'var(--color-error)' : 'var(--color-accent)' }}>
+                            <span style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px', color: batchTasks[idx]!.status === 'failed' ? 'var(--color-error)' : 'var(--color-accent)' }}>
                               {batchTasks[idx]!.status === 'queued' && 'Queued'}
                               {batchTasks[idx]!.status === 'downloading' && `${batchTasks[idx]!.progress?.percent ?? 0}%`}
-                              {batchTasks[idx]!.status === 'completed' && 'Done'}
-                              {batchTasks[idx]!.status === 'failed' && 'Error'}
+                              {batchTasks[idx]!.status === 'completed' && <><FiCheck /> Done</>}
+                              {batchTasks[idx]!.status === 'failed' && <><FiX /> Failed</>}
                             </span>
                           )}
                         </div>
@@ -505,6 +524,7 @@ export default function App() {
                         <FiDownload /> Playlist Progress
                       </span>
                       <span style={{ color: 'var(--color-accent)' }}>
+                        {retryRound > 0 && `Retry ${retryRound}/${settings.maxRetries ?? DEFAULT_SETTINGS.maxRetries} • `}
                         {batchDone} / {batchTasks.length}
                       </span>
                     </div>
