@@ -4,9 +4,12 @@ import '@testing-library/jest-dom';
 import { DownloadQueue } from './DownloadQueue';
 import { useDownloadStore } from '../store/downloadStore';
 
-const invokeMock = vi.fn().mockResolvedValue(undefined);
-vi.mock('@tauri-apps/api/core', () => ({
-  invoke: (...args: unknown[]) => invokeMock(...args),
+const cancelMock = vi.fn().mockResolvedValue(undefined);
+vi.mock('../platform', () => ({
+  backend: {
+    kind: 'web',
+    cancelDownload: (...args: unknown[]) => cancelMock(...args),
+  },
 }));
 
 vi.mock('react-i18next', () => ({
@@ -20,7 +23,7 @@ vi.mock('framer-motion', () => ({
 
 describe('DownloadQueue cancel button', () => {
   beforeEach(() => {
-    invokeMock.mockClear();
+    cancelMock.mockClear();
     useDownloadStore.setState({
       tasks: [
         {
@@ -42,7 +45,7 @@ describe('DownloadQueue cancel button', () => {
 
     // The bug: onCancel only called the local store's removeTask, so the
     // backend yt-dlp/ffmpeg process was never told to stop. Fixing it means
-    // cancelDownload() -> invoke('cancel_download', ...) must actually fire.
-    expect(invokeMock).toHaveBeenCalledWith('cancel_download', { taskId: 'task-1' });
+    // backend.cancelDownload(taskId) must actually fire.
+    expect(cancelMock).toHaveBeenCalledWith('task-1');
   });
 });

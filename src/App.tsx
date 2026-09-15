@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { convertFileSrc } from '@tauri-apps/api/core';
-import { FiDownload, FiAlertCircle, FiVolume2, FiVolumeX, FiSkipBack, FiSkipForward, FiRepeat, FiMoreVertical, FiPlay, FiPause, FiCheck, FiX } from 'react-icons/fi';
-import { listen } from '@tauri-apps/api/event';
+import { FiDownload, FiAlertCircle, FiVolume2, FiVolumeX, FiSkipBack, FiSkipForward, FiRepeat, FiMoreVertical, FiPlay, FiPause, FiCheck, FiX, FiSave } from 'react-icons/fi';
+import { backend, LocalFile } from './platform';
 
 import { URLInput } from './components/URLInput';
 import { DownloadHistory } from './components/DownloadHistory';
@@ -56,6 +55,7 @@ export default function App() {
 
   // Player preview states
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
+  const [previewDownloadUrl, setPreviewDownloadUrl] = useState<string | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
   const [previewCurrentTime, setPreviewCurrentTime] = useState(0);
   const [previewVolume, setPreviewVolume] = useState(0.8);
@@ -97,7 +97,8 @@ export default function App() {
       if (task) {
         setCurrentTask(task);
         if (task.status === 'completed' && task.outputPath) {
-          setPreviewAudioUrl(convertFileSrc(task.outputPath));
+          setPreviewAudioUrl(backend.fileUrl(task.outputPath));
+          setPreviewDownloadUrl(backend.downloadUrl(task.outputPath));
         }
       }
     } else {
@@ -132,38 +133,23 @@ export default function App() {
     }
   }, [settings.theme]);
 
-  // Setup Tauri progress listener locally for precise active task feedback
+  // Backend progress/finish events (Tauri events on desktop, SSE on the web)
   useEffect(() => {
-    const unlistenProgress = listen<{ taskId: string, progress: DownloadProgress }>('download-progress', (event) => {
-      updateTask(event.payload.taskId, {
-        status: 'downloading',
-        progress: event.payload.progress
-      });
+    return backend.subscribe({
+      onProgress: (taskId, progress: DownloadProgress) => {
+        updateTask(taskId, { status: 'downloading', progress });
+      },
+      onFinished: (event) => {
+        if (event.success) {
+          completeTask(event.taskId, event.outputPath || "", event.fileSize || 0);
+        } else {
+          failTask(event.taskId, event.error || "Unknown error");
+        }
+      },
+      onError: (taskId, error) => {
+        failTask(taskId, error || "Error");
+      },
     });
-
-    const unlistenComplete = listen<{ taskId: string, outputPath?: string, fileSize?: number, success: boolean, error?: string }>('download-finished', (event) => {
-      if (event.payload.success) {
-        completeTask(event.payload.taskId, event.payload.outputPath || "", event.payload.fileSize || 0);
-      } else {
-        failTask(event.payload.taskId, event.payload.error || "Unknown error");
-      }
-      if (event.payload.taskId === activeTaskId) {
-        setActiveTaskId(null);
-      }
-    });
-
-    const unlistenError = listen<{ taskId: string, error: string }>('download-error', (event) => {
-      failTask(event.payload.taskId, event.payload.error || "Error");
-      if (event.payload.taskId === activeTaskId) {
-        setActiveTaskId(null);
-      }
-    });
-
-    return () => {
-      unlistenProgress.then(f => f());
-      unlistenComplete.then(f => f());
-      unlistenError.then(f => f());
-    };
   }, [activeTaskId]);
 
   const handleUrlSubmit = async (url: string) => {
@@ -194,17 +180,18 @@ export default function App() {
     }
   };
 
-  const handleFileSelected = async (path: string) => {
-    setLocalFilePath(path);
+  const handleFileSelected = async (file: LocalFile) => {
+    setLocalFilePath(file.path);
     setCurrentUrl('');
     setPreviewAudioUrl(null);
+    setPreviewDownloadUrl(null);
     setVideoInfo(null);
 
-    const name = path.split(/[\\/]/).pop() || path;
+    const name = file.name;
     
     // Create temporary videoInfo for local file preview
     setVideoInfo({
-      id: path,
+      id: file.path,
       title: name,
       duration: 0, 
       uploader: 'Local File',
@@ -219,6 +206,7 @@ export default function App() {
     setCurrentUrl('');
     setLocalFilePath(null);
     setPreviewAudioUrl(null);
+    setPreviewDownloadUrl(null);
     setActiveTaskId(null);
     setBatchTaskIds(null);
     setRetryRound(0);
@@ -310,7 +298,7 @@ export default function App() {
           quality: qualityStr,
           outputDir: settings.outputDir
         });
-        setTimeout(() => handleReset(), 2000); // Auto-reset after 2 seconds
+        // Stay on this task: the progress card turns into the result (preview + download).
       } catch (err) {
         failTask(singleTaskId, err as string);
         setActiveTaskId(null);
@@ -334,7 +322,7 @@ export default function App() {
         const outFileName = `${name}_extracted.${format}`;
         const finalOutPath = `${settings.outputDir}/${outFileName}`;
 
-        await trimAudio({
+        const result = await trimAudio({
           inputPath: localFilePath,
           outputPath: finalOutPath,
           startTime: useFullTrack ? 0 : startTime,
@@ -342,10 +330,9 @@ export default function App() {
         });
 
         // Local extraction completes immediately
-        completeTask(singleTaskId, finalOutPath, 1024 * 1024 * 15); // dummy size
-        setPreviewAudioUrl(convertFileSrc(finalOutPath));
-        setActiveTaskId(null);
-        setTimeout(() => handleReset(), 2000); // Auto-reset after 2 seconds
+        completeTask(singleTaskId, result.outputPath, result.fileSize || 1024 * 1024 * 15);
+        setPreviewAudioUrl(backend.fileUrl(result.outputPath));
+        setPreviewDownloadUrl(backend.downloadUrl(result.outputPath));
       } catch (err) {
         failTask(singleTaskId, err as string);
         setActiveTaskId(null);
@@ -583,6 +570,19 @@ export default function App() {
                       <span>Extracting: {videoInfo?.title}</span>
                       <span>Format: {selectedFormat} • Quality: {selectedQuality} kbps • Channels: Stereo</span>
                     </div>
+                    {currentTask.status === 'failed' && currentTask.error && (
+                      <div style={{ marginTop: '8px', fontSize: '0.8rem', color: 'var(--color-error)', whiteSpace: 'pre-wrap' }}>{currentTask.error}</div>
+                    )}
+                    {(currentTask.status === 'completed' || currentTask.status === 'failed') && (
+                      <div style={{ marginTop: '12px', display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        {currentTask.status === 'completed' && currentTask.outputPath && backend.downloadUrl(currentTask.outputPath) && (
+                          <a className="btn-primary" href={backend.downloadUrl(currentTask.outputPath) ?? undefined} download style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', width: 'auto', padding: '0 16px' }}>
+                            <FiSave /> {t('history.download', 'Download')}
+                          </a>
+                        )}
+                        <button className="btn-secondary" onClick={handleReset}>{t('common.newExtraction', 'New extraction')}</button>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -626,6 +626,11 @@ export default function App() {
                       />
                     </div>
 
+                    {previewDownloadUrl && (
+                      <a className="btn-secondary" href={previewDownloadUrl} download title="Download" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
+                        <FiSave /> {t('history.download', 'Download')}
+                      </a>
+                    )}
                     <button 
                       className={`btn-ghost ${previewLoop ? 'active-loop' : ''}`} 
                       onClick={() => setPreviewLoop(!previewLoop)}

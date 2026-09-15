@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import { AppSettings } from '../types';
 import { DEFAULT_SETTINGS } from '../utils/constants';
 
-import { invoke } from '@tauri-apps/api/core';
+import { backend } from '../platform';
 
 interface SettingsStore {
   settings: AppSettings;
@@ -24,7 +24,7 @@ export const useSettingsStore = create<SettingsStore>()(
         const currentSettings = get().settings;
         if (!currentSettings.outputDir) {
           try {
-            const defaultDir = await invoke<string>('get_default_output_dir');
+            const defaultDir = await backend.getDefaultOutputDir();
             set((state) => ({
               settings: { ...state.settings, outputDir: defaultDir }
             }));

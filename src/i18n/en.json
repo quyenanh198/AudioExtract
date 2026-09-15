@@ -7,7 +7,9 @@
     "placeholder": "Paste video URL here...",
     "paste": "Paste",
     "invalid": "Invalid URL",
-    "fetching": "Fetching info..."
+    "fetching": "Fetching info...",
+    "uploading": "Uploading...",
+    "browse": "Browse Files"
   },
   "videoInfo": {
     "duration": "Duration",
@@ -42,7 +44,8 @@
     "openFile": "Open File",
     "openFolder": "Open Folder",
     "delete": "Delete",
-    "clear": "Clear All"
+    "clear": "Clear All",
+    "download": "Download"
   },
   "settings": {
     "title": "Settings",
@@ -54,7 +57,8 @@
     "autoUpdate": "Auto Update",
     "concurrent": "Concurrent Downloads",
     "maxRetries": "Max Retries (playlist)",
-    "browse": "Browse"
+    "browse": "Browse",
+    "serverStorage": "Files are kept on the server for 7 days — download them from the Library."
   },
   "common": {
     "loading": "Loading...",
@@ -62,6 +66,7 @@
     "success": "Success",
     "cancel": "Cancel",
     "save": "Save",
-    "close": "Close"
+    "close": "Close",
+    "newExtraction": "New extraction"
   }
 }

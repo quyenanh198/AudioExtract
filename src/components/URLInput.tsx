@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FiClipboard, FiLoader, FiUploadCloud } from 'react-icons/fi';
-import { open } from '@tauri-apps/plugin-dialog';
+import { backend, LocalFile } from '../platform';
 import './URLInput.css';
 
 interface URLInputProps {
   onUrlSubmit: (url: string) => void;
-  onFileSelected: (path: string) => void;
+  onFileSelected: (file: LocalFile) => void;
   isLoading: boolean;
 }
 
@@ -15,6 +15,10 @@ export const URLInput: React.FC<URLInputProps> = ({ onUrlSubmit, onFileSelected,
   const [url, setUrl] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [isValidUrl, setIsValidUrl] = useState<boolean | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const busy = isLoading || isUploading;
 
   // Validate URL on change
   useEffect(() => {
@@ -38,20 +42,31 @@ export const URLInput: React.FC<URLInputProps> = ({ onUrlSubmit, onFileSelected,
     }
   };
 
+  // Desktop: native picker. Web: hidden <input type=file>, then upload to the server.
   const handleBrowse = async () => {
+    if (backend.kind === 'web') {
+      fileInputRef.current?.click();
+      return;
+    }
     try {
-      const selected = await open({
-        multiple: false,
-        filters: [{
-          name: 'Media Files',
-          extensions: ['mp4', 'mov', 'mkv', 'mp3', 'wav', 'm4a', 'flac', 'opus', 'webm']
-        }]
-      });
-      if (selected && typeof selected === 'string') {
-        onFileSelected(selected);
-      }
+      const selected = await backend.pickLocalFile();
+      if (selected) onFileSelected(selected);
     } catch (err) {
       console.error('Failed to open file dialog:', err);
+    }
+  };
+
+  const importBrowserFile = async (file: File) => {
+    setIsUploading(true);
+    setUploadError(null);
+    try {
+      onFileSelected(await backend.importFile(file));
+    } catch (err) {
+      console.error('Upload failed:', err);
+      setUploadError((err as Error).message);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -69,12 +84,10 @@ export const URLInput: React.FC<URLInputProps> = ({ onUrlSubmit, onFileSelected,
     e.preventDefault();
     setIsDragging(false);
     
-    // Tauri handles file drop at window level natively, but we can also capture it here in web context
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      // Note: In standard browser sandbox, file.path is empty.
-      // But in Tauri, custom drag-drop handler is needed or we can read file name.
-      // Tauri emits a native `tauri://drag-drop` event which is handled globally in App.tsx
-    }
+    // In the browser the dropped File can be uploaded straight away. Tauri
+    // handles drops natively at the window level, so nothing to do there.
+    const file = e.dataTransfer.files?.[0];
+    if (file && backend.kind === 'web') void importBrowserFile(file);
   };
 
   const handleUrlSubmitClick = (e: React.FormEvent) => {
@@ -105,10 +118,22 @@ export const URLInput: React.FC<URLInputProps> = ({ onUrlSubmit, onFileSelected,
       <p className="drop-subtitle">{t('urlInput.dropSubtitle', 'Supports MP4, MOV, MKV, MP3, WAV, and more.')}</p>
 
       <div className="drop-actions">
-        <button className="btn-secondary browse-btn" onClick={handleBrowse} disabled={isLoading}>
-          <FiUploadCloud /> {t('urlInput.browse', 'Browse Files')}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="video/*,audio/*,.mp4,.mov,.mkv,.mp3,.wav,.m4a,.flac,.opus,.webm"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) void importBrowserFile(file);
+          }}
+        />
+        <button className="btn-secondary browse-btn" onClick={handleBrowse} disabled={busy}>
+          {isUploading ? <FiLoader className="spin" /> : <FiUploadCloud />}{' '}
+          {isUploading ? t('urlInput.uploading', 'Uploading...') : t('urlInput.browse', 'Browse Files')}
         </button>
       </div>
+      {uploadError && <p className="drop-subtitle" style={{ color: 'var(--color-error)' }}>{uploadError}</p>}
 
       <form className="url-paste-form" onSubmit={handleUrlSubmitClick}>
         <div className="url-input-wrapper">
@@ -118,14 +143,14 @@ export const URLInput: React.FC<URLInputProps> = ({ onUrlSubmit, onFileSelected,
             placeholder={t('urlInput.placeholder', 'Or paste YouTube, Facebook, TikTok link...')}
             value={url}
             onChange={(e) => setUrl(e.target.value)}
-            disabled={isLoading}
+            disabled={busy}
           />
           <button 
             type="button" 
             className="btn-ghost paste-btn" 
             onClick={handlePaste}
             title={t('urlInput.paste', 'Paste link')}
-            disabled={isLoading}
+            disabled={busy}
           >
             <FiClipboard />
           </button>
@@ -133,7 +158,7 @@ export const URLInput: React.FC<URLInputProps> = ({ onUrlSubmit, onFileSelected,
         <button 
           type="submit" 
           className="btn-primary submit-url-btn" 
-          disabled={!isValidUrl || !url || isLoading}
+          disabled={!isValidUrl || !url || busy}
           style={{ width: 'auto', padding: '0 20px', minWidth: '90px' }}
         >
           {isLoading ? <FiLoader className="spin" /> : t('common.extract', 'Extract')}

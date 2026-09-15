@@ -119,3 +119,9 @@
   justify-content: flex-end;
   margin-top: var(--spacing-md);
 }
+
+.settings-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}

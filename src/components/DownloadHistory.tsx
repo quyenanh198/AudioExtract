@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useDownloadStore } from '../store/downloadStore';
-import { invoke } from '@tauri-apps/api/core';
-import { FiFolder, FiPlay, FiTrash2, FiSearch } from 'react-icons/fi';
+import { backend } from '../platform';
+import { FiFolder, FiPlay, FiTrash2, FiSearch, FiDownload } from 'react-icons/fi';
 import './DownloadHistory.css';
 
 export const DownloadHistory: React.FC = () => {
@@ -34,21 +34,26 @@ export const DownloadHistory: React.FC = () => {
     item.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const isWeb = backend.kind === 'web';
+
+  // Web: play in a new tab. Desktop: nothing yet (files open from the folder).
   const handleOpenFile = async (path: string) => {
-    try {
-      // Platform specific open file can be added here
-      console.log('Open file:', path);
-    } catch (e) {
-      console.error(e);
-    }
+    if (isWeb) window.open(backend.fileUrl(path), '_blank', 'noopener');
   };
 
+  // Web: browser download. Desktop: reveal in Finder/Explorer.
   const handleOpenFolder = async (path: string) => {
     try {
-      await invoke('open_file_in_explorer', { path });
+      await backend.revealFile(path);
     } catch (e) {
       console.error('Failed to open folder:', e);
     }
+  };
+
+  // Removing a history row on the web also frees the file on the server.
+  const handleRemove = async (id: string, path: string) => {
+    removeFromHistory(id);
+    if (isWeb && path) backend.deleteFile(path).catch((e) => console.error('Failed to delete file:', e));
   };
 
   return (
@@ -109,10 +114,14 @@ export const DownloadHistory: React.FC = () => {
                   <button className="btn-secondary" onClick={() => handleOpenFile(item.outputPath)} title={t('history.openFile', 'Open File')}>
                     <FiPlay />
                   </button>
-                  <button className="btn-secondary" onClick={() => handleOpenFolder(item.outputPath)} title={t('history.openFolder', 'Open Folder')}>
-                    <FiFolder />
+                  <button
+                    className="btn-secondary"
+                    onClick={() => handleOpenFolder(item.outputPath)}
+                    title={isWeb ? t('history.download', 'Download') : t('history.openFolder', 'Open Folder')}
+                  >
+                    {isWeb ? <FiDownload /> : <FiFolder />}
                   </button>
-                  <button className="btn-ghost text-danger" onClick={() => removeFromHistory(item.id)} title={t('history.delete', 'Delete')}>
+                  <button className="btn-ghost text-danger" onClick={() => handleRemove(item.id, item.outputPath)} title={t('history.delete', 'Delete')}>
                     <FiTrash2 />
                   </button>
                 </div>

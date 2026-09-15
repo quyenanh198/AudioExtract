@@ -9,7 +9,7 @@ const QUALITY_PRESETS = ['Best', 'High', 'Standard', 'Low'];
 
 export const SettingsPanel: React.FC = () => {
   const { t } = useTranslation();
-  const { settings, updateSettings, selectOutputDir } = useSettings();
+  const { settings, updateSettings, selectOutputDir, canChooseOutputDir } = useSettings();
   const [localSettings, setLocalSettings] = useState(settings);
   const [isSaved, setIsSaved] = useState(false);
 
@@ -36,20 +36,27 @@ export const SettingsPanel: React.FC = () => {
       <h3>{t('settings.title', 'Settings')}</h3>
       
       <div className="settings-form">
-        <div className="form-group">
-          <label>{t('settings.outputDir', 'Output Directory')}</label>
-          <div className="input-with-button">
-            <input 
-              type="text" 
-              className="input-field" 
-              value={localSettings.outputDir}
-              onChange={(e) => setLocalSettings({...localSettings, outputDir: e.target.value})}
-            />
-            <button className="btn-secondary" onClick={handleBrowse}>
-              <FiFolder /> {t('settings.browse', 'Browse')}
-            </button>
+        {canChooseOutputDir ? (
+          <div className="form-group">
+            <label>{t('settings.outputDir', 'Output Directory')}</label>
+            <div className="input-with-button">
+              <input 
+                type="text" 
+                className="input-field" 
+                value={localSettings.outputDir}
+                onChange={(e) => setLocalSettings({...localSettings, outputDir: e.target.value})}
+              />
+              <button className="btn-secondary" onClick={handleBrowse}>
+                <FiFolder /> {t('settings.browse', 'Browse')}
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="form-group">
+            <label>{t('settings.outputDir', 'Output Directory')}</label>
+            <p className="settings-hint">{t('settings.serverStorage', 'Files are kept on the server for 7 days — download them from the Library.')}</p>
+          </div>
+        )}
 
         <div className="form-row">
           <div className="form-group">

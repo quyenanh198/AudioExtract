@@ -1,0 +1,14 @@
+{
+  "name": "audio-extract-server",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "HTTP backend for the AudioExtract web build: yt-dlp + ffmpeg behind an Express API.",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}

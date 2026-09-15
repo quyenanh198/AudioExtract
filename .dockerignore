@@ -1,0 +1,11 @@
+.git
+.github
+.claude
+.agents
+node_modules
+server/node_modules
+dist
+data
+src-tauri/target
+src-tauri/binaries
+src-tauri/gen

@@ -7,7 +7,9 @@
     "placeholder": "Dán URL video vào đây...",
     "paste": "Dán",
     "invalid": "URL không hợp lệ",
-    "fetching": "Đang lấy thông tin..."
+    "fetching": "Đang lấy thông tin...",
+    "uploading": "Đang tải lên...",
+    "browse": "Chọn tệp"
   },
   "videoInfo": {
     "duration": "Thời lượng",
@@ -42,7 +44,8 @@
     "openFile": "Mở tệp",
     "openFolder": "Mở thư mục",
     "delete": "Xóa",
-    "clear": "Xóa tất cả"
+    "clear": "Xóa tất cả",
+    "download": "Tải về"
   },
   "settings": {
     "title": "Cài đặt",
@@ -54,7 +57,8 @@
     "autoUpdate": "Tự động cập nhật",
     "concurrent": "Số lượt tải đồng thời",
     "maxRetries": "Số lần thử lại tối đa (playlist)",
-    "browse": "Duyệt"
+    "browse": "Duyệt",
+    "serverStorage": "Tệp được giữ trên máy chủ 7 ngày — tải về từ mục Lịch sử."
   },
   "common": {
     "loading": "Đang tải...",
@@ -62,6 +66,7 @@
     "success": "Thành công",
     "cancel": "Hủy",
     "save": "Lưu",
-    "close": "Đóng"
+    "close": "Đóng",
+    "newExtraction": "Trích xuất mới"
   }
 }

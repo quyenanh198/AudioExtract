@@ -29,6 +29,10 @@ export default defineConfig(async () => ({
           port: 1421,
         }
       : undefined,
+    // Web build: the Node server (server/index.mjs) answers /api during dev.
+    proxy: {
+      "/api": { target: "http://localhost:3000", changeOrigin: true },
+    },
     watch: {
       // 3. tell Vite to ignore watching `src-tauri`
       ignored: ["**/src-tauri/**"],
