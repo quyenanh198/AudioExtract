@@ -4,34 +4,29 @@ import { FiMusic, FiCheck, FiLoader } from 'react-icons/fi';
 import { backend } from '../platform';
 import { webExtras, MusikPlaylist } from '../platform/webExtras';
 
-let cachedPlaylists: MusikPlaylist[] | null = null;
-let musikAvailable: boolean | null = null;
+// Shared across instances (history rows render many) so the server is asked once.
+let playlistsPromise: Promise<MusikPlaylist[]> | null = null;
+let statusPromise: Promise<boolean> | null = null;
+const loadPlaylists = () => (playlistsPromise ??= webExtras.musikPlaylists().catch(() => (playlistsPromise = null, [] as MusikPlaylist[])));
+const loadAvailable = () => (statusPromise ??= webExtras.status().then((s) => s.musik).catch(() => (statusPromise = null, false)));
 
 /** "Add to Musik" control: optional playlist picker + button. Web build only, hidden when Musik isn't configured. */
 export const SendToMusik: React.FC<{ outputPath: string; compact?: boolean }> = ({ outputPath, compact }) => {
   const { t } = useTranslation();
-  const [available, setAvailable] = useState<boolean>(musikAvailable ?? false);
-  const [playlists, setPlaylists] = useState<MusikPlaylist[]>(cachedPlaylists ?? []);
+  const [available, setAvailable] = useState(false);
+  const [playlists, setPlaylists] = useState<MusikPlaylist[]>([]);
   const [playlistId, setPlaylistId] = useState<string>('');
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (backend.kind !== 'web') return;
-    if (musikAvailable === null) {
-      webExtras.status().then((s) => {
-        musikAvailable = s.musik;
-        setAvailable(s.musik);
-      }).catch(() => setAvailable(false));
-    }
+    void loadAvailable().then(setAvailable);
   }, []);
 
   useEffect(() => {
-    if (!available || cachedPlaylists) return;
-    webExtras.musikPlaylists().then((list) => {
-      cachedPlaylists = list;
-      setPlaylists(list);
-    }).catch(() => {});
+    if (!available) return;
+    void loadPlaylists().then(setPlaylists);
   }, [available]);
 
   if (backend.kind !== 'web' || !available) return null;
@@ -40,7 +35,7 @@ export const SendToMusik: React.FC<{ outputPath: string; compact?: boolean }> = 
     setState('sending');
     try {
       const result = await webExtras.importToMusik(outputPath, playlistId ? Number(playlistId) : undefined);
-      cachedPlaylists = null; // track counts changed
+      playlistsPromise = null; // track counts changed
       setState('done');
       setMessage(result.playlist ? t('musik.addedTo', { name: result.playlist.name, defaultValue: 'Added to {{name}}' }) : t('musik.added', 'Added to Musik'));
     } catch (e) {
